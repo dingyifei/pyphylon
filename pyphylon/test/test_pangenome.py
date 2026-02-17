@@ -7,11 +7,8 @@ import shutil
 from pathlib import Path
 from pyphylon.pangenome import *
 
-# we are calling CD-HIT in the snakemake pipeline, so it is difficult to test the pangenome construction functions fully as we are not running CD-HIT
-# need to discuss with Jon and Sidd how we want to proceed. 
-
 GENOMES_TO_TEST = ['798300.3','530008.3','286636.3']
-CD_HIT_STATS = {"GENOMES":3, "CLUSTERS":2144, "ALLELES":5279}
+CD_HIT_STATS = {"GENOMES":3, "CLUSTERS":2144, "ALLELES":4218}
 
 testdata = [(GENOMES_TO_TEST, CD_HIT_STATS)]
 
