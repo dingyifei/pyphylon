@@ -39,6 +39,7 @@ def filter_by_genome_quality(
     contamination_cutoff=None,
     completeness_cutoff=None,
     checkm_filter_statuses=('WGS',),
+    checkm_missing='keep',
     return_stats=True,
 ):
     """
@@ -53,6 +54,8 @@ def filter_by_genome_quality(
     - checkm_filter_statuses (tuple, optional): Genome statuses to apply CheckM
         filtering to. Default is ('WGS',) for backward compatibility. Set to
         ('Complete', 'WGS') to filter all genome types, or None to filter all.
+    - checkm_missing (str, optional): How to handle genomes with null CheckM data.
+        'keep' retains them (default), 'drop' discards them.
     - return_stats (bool, optional): Whether to return filtration statistics.
 
     Returns:
@@ -100,8 +103,8 @@ def filter_by_genome_quality(
         checkm_subset = filtered[checkm_mask]
         skip_subset = filtered[~checkm_mask]
 
-    checkm_subset = _filter_checkM_contamination(checkm_subset, contamination_cutoff)
-    checkm_subset = _filter_checkM_completeness(checkm_subset, completeness_cutoff)
+    checkm_subset = _filter_checkM_contamination(checkm_subset, contamination_cutoff, checkm_missing)
+    checkm_subset = _filter_checkM_completeness(checkm_subset, completeness_cutoff, checkm_missing)
 
     filtered_species_summary = pd.concat([checkm_subset, skip_subset])
 
@@ -113,8 +116,8 @@ def filter_by_genome_quality(
     filtered_species_summary['contig_l50'] = filtered_species_summary['contig_l50'].astype('int')
     filtered_species_summary['contig_n50'] = filtered_species_summary['contig_n50'].astype('int')
     filtered_species_summary['contigs'] = filtered_species_summary['contigs'].astype('int')
-    filtered_species_summary['checkm_contamination'] = filtered_species_summary['checkm_contamination'].astype('float')
-    filtered_species_summary['checkm_completeness'] = filtered_species_summary['checkm_completeness'].astype('float')
+    filtered_species_summary['checkm_contamination'] = pd.to_numeric(filtered_species_summary['checkm_contamination'], errors='coerce')
+    filtered_species_summary['checkm_completeness'] = pd.to_numeric(filtered_species_summary['checkm_completeness'], errors='coerce')
     filtered_species_summary['gc_content'] = filtered_species_summary['gc_content'].astype('float')
     
     if return_stats:
@@ -190,59 +193,74 @@ def _filter_by_contig(species_wgs_summary, max_contig):
     return species_wgs_summary
 
 
-def _filter_checkM_contamination(species_wgs_summary, contamination_cutoff):
+def _filter_checkM_contamination(species_wgs_summary, contamination_cutoff, checkm_missing='keep'):
     """
     Filter genomes by CheckM contamination score.
 
     Parameters:
     - species_wgs_summary (pd.DataFrame): DataFrame containing WGS genomes.
     - contamination_cutoff (float, optional): Maximum allowed CheckM contamination score.
+    - checkm_missing (str, optional): How to handle genomes with null CheckM data.
+        'keep' retains them (default), 'drop' discards them.
 
     Returns:
     - pd.DataFrame: Filtered DataFrame with genomes having contamination scores below the cutoff.
     """
     if species_wgs_summary.empty:
         return species_wgs_summary
-    species_wgs_summary = species_wgs_summary.dropna(subset=['checkm_contamination'])
-    float_values = species_wgs_summary['checkm_contamination'].copy().astype('float')
-    species_wgs_summary.loc[:,'checkm_contamination'] = float_values
-    
+
+    has_data = species_wgs_summary.dropna(subset=['checkm_contamination']).copy()
+    missing_data = species_wgs_summary[species_wgs_summary['checkm_contamination'].isna()]
+
+    has_data['checkm_contamination'] = has_data['checkm_contamination'].astype('float')
+
     if contamination_cutoff:
-        cond = species_wgs_summary['checkm_contamination'] < contamination_cutoff
+        cond = has_data['checkm_contamination'] < contamination_cutoff
     else:
-        kneebow_cutoff = _get_kneebow_cutoff(species_wgs_summary, column='checkm_contamination', curve='elbow')
-        cond = species_wgs_summary['checkm_contamination'] < kneebow_cutoff
-    
-    species_wgs_summary = species_wgs_summary[cond]
-    
-    return species_wgs_summary
+        kneebow_cutoff = _get_kneebow_cutoff(has_data, column='checkm_contamination', curve='elbow')
+        cond = has_data['checkm_contamination'] < kneebow_cutoff
+
+    has_data = has_data[cond]
+
+    if checkm_missing == 'keep':
+        return pd.concat([has_data, missing_data])
+    else:
+        return has_data
 
 
-def _filter_checkM_completeness(species_wgs_summary, completeness_cutoff):
+def _filter_checkM_completeness(species_wgs_summary, completeness_cutoff, checkm_missing='keep'):
     """
     Filter genomes by CheckM completeness score.
 
     Parameters:
     - species_wgs_summary (pd.DataFrame): DataFrame containing WGS genomes.
     - completeness_cutoff (float, optional): Minimum allowed CheckM completeness score.
+    - checkm_missing (str, optional): How to handle genomes with null CheckM data.
+        'keep' retains them (default), 'drop' discards them.
 
     Returns:
     - pd.DataFrame: Filtered DataFrame with genomes having completeness scores above the cutoff.
     """
     if species_wgs_summary.empty:
         return species_wgs_summary
-    species_wgs_summary = species_wgs_summary.dropna(subset=['checkm_completeness'])
-    species_wgs_summary['checkm_completeness'] = species_wgs_summary['checkm_completeness'].astype('float')
-    
+
+    has_data = species_wgs_summary.dropna(subset=['checkm_completeness']).copy()
+    missing_data = species_wgs_summary[species_wgs_summary['checkm_completeness'].isna()]
+
+    has_data['checkm_completeness'] = has_data['checkm_completeness'].astype('float')
+
     if completeness_cutoff:
-        cond = species_wgs_summary['checkm_completeness'] > completeness_cutoff
+        cond = has_data['checkm_completeness'] > completeness_cutoff
     else:
-        kneebow_cutoff = _get_kneebow_cutoff(species_wgs_summary, column='checkm_completeness', curve='knee')
-        cond = species_wgs_summary['checkm_completeness'] > kneebow_cutoff
-    
-    species_wgs_summary = species_wgs_summary[cond]
-    
-    return species_wgs_summary
+        kneebow_cutoff = _get_kneebow_cutoff(has_data, column='checkm_completeness', curve='knee')
+        cond = has_data['checkm_completeness'] > kneebow_cutoff
+
+    has_data = has_data[cond]
+
+    if checkm_missing == 'keep':
+        return pd.concat([has_data, missing_data])
+    else:
+        return has_data
 
 
 # Helper functions

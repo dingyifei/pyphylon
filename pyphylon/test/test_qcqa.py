@@ -24,5 +24,9 @@ def test_filter_by_species(genome_file, species_name) -> None:
 
 def test_filter_by_genome_quality(genome_file) -> None:
     summary_file = pd.read_csv(genome_file, index_col=0, dtype={'genome_id':str}, sep='\t')
+    # Default checkm_missing='keep' retains genomes with null CheckM data
     species_summary, stats = filter_by_genome_quality(summary_file)
-    assert len(species_summary) == 257
+    assert len(species_summary) == 1808
+    # checkm_missing='drop' reproduces the old behavior
+    species_summary_drop, _ = filter_by_genome_quality(summary_file, checkm_missing='drop')
+    assert len(species_summary_drop) == 257
