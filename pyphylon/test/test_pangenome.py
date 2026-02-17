@@ -8,6 +8,12 @@ from pathlib import Path
 from pyphylon.pangenome import *
 
 GENOMES_TO_TEST = ['798300.3','530008.3','286636.3']
+# TODO: These expected values have never been verified against actual CD-HIT output.
+# The original value (5279 alleles) came from a pre-canned .clstr fixture; the current
+# value (4218) was set during a bugfix without running the test end-to-end.
+# The stale .clstr fixture in test/data/cd-hit-results/ is no longer used by the test
+# (build_cds_pangenome now invokes CD-HIT directly) but remains on disk.
+# To verify: run this test with CD-HIT installed and update the values to match.
 CD_HIT_STATS = {"GENOMES":3, "CLUSTERS":2144, "ALLELES":4218}
 
 testdata = [(GENOMES_TO_TEST, CD_HIT_STATS)]
