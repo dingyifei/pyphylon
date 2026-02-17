@@ -1,6 +1,6 @@
 # 01 - Switch Pipeline to Campylobacter jejuni via BV-BRC API
 
-**Date**: 2026-02-17 ~01:00 EST
+**Date**: 2026-02-16 ~22:00 PST
 
 ## Summary
 
@@ -42,7 +42,7 @@ pytest pyphylon/test/test_downloads.py -v
 
 # 01b - Replace Selenium N50 Scraping with NCBI Datasets API
 
-**Date**: 2026-02-17 ~01:25 EST
+**Date**: 2026-02-16 ~22:25 PST
 
 ## Summary
 
@@ -74,7 +74,7 @@ pytest pyphylon/test/test_downloads.py -v
 
 ## 01c - Pin Dependency Versions (numba/numpy Fix)
 
-**Date**: 2026-02-17 ~03:00 EST
+**Date**: 2026-02-17 ~00:00 PST
 
 ### Summary
 
@@ -98,7 +98,7 @@ MSYS_NO_PATHCONV=1 wsl -d pangenome -- bash -lc "cd /mnt/f/lab_projects/pangenom
 
 ## 01d - Configurable CheckM Filtering by Genome Status
 
-**Date**: 2026-02-17 ~04:00 EST
+**Date**: 2026-02-17 ~01:00 PST
 
 ### Summary
 
