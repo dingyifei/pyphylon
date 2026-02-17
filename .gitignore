@@ -164,7 +164,11 @@ cython_debug/
 examples/data/*
 examples/deprecated/*
 
+# Downloaded paper PDFs
+papers/*.pdf
+
 workflow/.snakemake/*
 
 examples/config.py
 /.idea
+/temp/1b_protected/raw/genomes/fna
