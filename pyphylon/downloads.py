@@ -14,12 +14,6 @@ import pandas as pd
 from typing import Union
 from Bio import Entrez
 from tqdm.notebook import tqdm
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
 
 
 # URLs
@@ -112,6 +106,63 @@ def download_example_bvbrc_genome_info(output_dir=None, force=False):
             logging.info(f"Downloaded {filename} to {file_path}")
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to download {filename}: {e}")
+
+
+def query_bvbrc_genomes(taxon_id, genome_status=None, genome_quality=None, limit=25000):
+    """
+    Query BV-BRC API for genomes by taxon ID (includes all descendant taxa).
+
+    Parameters:
+    - taxon_id (int/str): NCBI taxonomy ID (e.g., 197 for C. jejuni)
+    - genome_status (str, optional): Filter by status ('Complete', 'WGS')
+    - genome_quality (str, optional): Filter by quality ('Good', 'Fair', 'Poor')
+    - limit (int): Max records per request (default 25000)
+
+    Returns:
+    - pd.DataFrame: Genome records from BV-BRC
+    """
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    base_url = "https://www.bv-brc.org/api/genome/"
+
+    # Build RQL query — use taxon_lineage_ids to include subspecies/strains
+    rql_parts = [f"eq(taxon_lineage_ids,{taxon_id})"]
+    if genome_status is not None:
+        rql_parts.append(f"eq(genome_status,{genome_status})")
+    if genome_quality is not None:
+        rql_parts.append(f"eq(genome_quality,{genome_quality})")
+
+    all_records = []
+    offset = 0
+
+    while True:
+        rql_query = "&".join(rql_parts + [f"limit({limit},{offset})"])
+        url = f"{base_url}?{rql_query}"
+        headers = {"Accept": "application/json"}
+
+        logging.info(f"Querying BV-BRC API (offset={offset})...")
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+
+        records = response.json()
+        if not records:
+            break
+
+        all_records.extend(records)
+        logging.info(f"Retrieved {len(records)} records (total: {len(all_records)})")
+
+        if len(records) < limit:
+            break
+        offset += limit
+
+    if not all_records:
+        logging.warning(f"No genomes found for taxon_id={taxon_id}")
+        return pd.DataFrame()
+
+    df = pd.DataFrame(all_records)
+    logging.info(f"Total genomes retrieved: {df.shape[0]}")
+    return df
+
 
 # Genome sequence downloads
 def download_genome_sequences(df_or_filepath: Union[str, pd.DataFrame], output_dir, force=False):
@@ -271,24 +322,31 @@ def download_genomes_bvbrc(genomes, output_dir, filetypes=['fna','gff'], force=F
 # Retrieval functions
 def get_scaffold_n50_for_species(taxon_id):
     """
-    Retrieves the Scaffold N50 value for a given species by its taxon ID.
-    
+    Retrieves the Scaffold N50 value for a species' reference genome via NCBI Datasets API.
+
     Parameters:
-    taxon_id (str): The taxon ID of the species.
-    
+    - taxon_id (str/int): NCBI taxonomy ID (e.g., 197 for C. jejuni, 562 for E. coli)
+
     Returns:
-    int: The Scaffold N50 value in base units.
+    - int: Scaffold N50 in base pairs
     """
-    # Configure logging
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    logging.info(f"Fetching reference genome link for taxon ID {taxon_id}")
-    reference_genome_url = get_reference_genome_link(taxon_id)
-    full_reference_genome_url = f"https://www.ncbi.nlm.nih.gov{reference_genome_url}"
-    logging.info(f"Fetching Scaffold N50 value from {full_reference_genome_url}")
-    scaffold_n50 = get_scaffold_n50(full_reference_genome_url)
+    url = f"https://api.ncbi.nlm.nih.gov/datasets/v2/genome/taxon/{taxon_id}/dataset_report"
+    params = {"filters.reference_only": "true", "page_size": 1}
 
-    return scaffold_n50
+    logging.info(f"Querying NCBI Datasets API for reference genome (taxon_id={taxon_id})...")
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    data = response.json()
+
+    reports = data.get("reports", [])
+    if not reports:
+        raise ValueError(f"No reference genome found for taxon ID {taxon_id}")
+
+    scaffold_n50 = reports[0]["assembly_stats"]["scaffold_n50"]
+    logging.info(f"Scaffold N50 for taxon {taxon_id}: {scaffold_n50}")
+    return int(scaffold_n50)
 
 # Helper functions
 def download_from_bvbrc(ftp_path, save_path, force=False):
@@ -330,100 +388,3 @@ def download_from_ncbi(query, save_path, email='your_email@example.com'):
         with open(save_path, 'w') as f:
             f.write(handle.read())
 
-def get_reference_genome_link(taxon_id):
-    """
-    Retrieves the reference genome link from NCBI for a given taxon ID.
-    
-    Parameters:
-    taxon_id (str): The taxon ID of the species.
-    
-    Returns:
-    str: The URL of the reference genome page.
-    """
-    url = f"https://www.ncbi.nlm.nih.gov/datasets/taxonomy/{taxon_id}"
-
-    # Set up Selenium WebDriver
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Run headless
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
-    driver.get(url)
-
-    # Allow time for JavaScript to execute
-    time.sleep(5)  # Adjust as needed for the page to load completely
-
-    # Extract page source and parse with BeautifulSoup
-    page_source = driver.page_source
-    driver.quit()
-
-    soup = BeautifulSoup(page_source, 'html.parser')
-    reference_genome_link = None
-    
-    # Find the <a> tag with '/datasets/genome' in its href attribute
-    for link in soup.find_all('a', href=True):
-        if '/datasets/genome/GC' in link['href']:
-            reference_genome_link = link['href']
-            logging.info(f"Found reference genome link: {reference_genome_link}")
-            break
-    
-    if reference_genome_link is None:
-        raise ValueError(f"Reference genome link not found for taxon ID {taxon_id}")
-    
-    return reference_genome_link
-
-def get_scaffold_n50(reference_genome_url):
-    """
-    Retrieves the Scaffold N50 value from the reference genome page using Selenium.
-    
-    Parameters:
-    reference_genome_url (str): The URL of the reference genome page.
-    
-    Returns:
-    int: The Scaffold N50 value in base units.
-    """
-    # Set up Selenium WebDriver
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Run headless
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
-    driver.get(reference_genome_url)
-
-    # Allow time for JavaScript to execute
-    time.sleep(5)  # Adjust as needed for the page to load completely
-
-    # Extract page source and parse with BeautifulSoup
-    page_source = driver.page_source
-    driver.quit()
-
-    soup = BeautifulSoup(page_source, 'html.parser')
-    scaffold_n50 = None
-    
-    # Find the <td> element containing the text "Scaffold N50" and the next <td> element
-    scaffold_n50_td = soup.find('td', text="Scaffold N50")
-    if scaffold_n50_td:
-        logging.info("Found 'Scaffold N50' cell.")
-        next_td = scaffold_n50_td.find_next('td')
-        if next_td:
-            scaffold_n50 = next_td.text.strip()
-            logging.info(f"Found Scaffold N50 value: {scaffold_n50}")
-        else:
-            logging.warning(f"No following <td> element found for 'Scaffold N50'.")
-    else:
-        logging.warning(f"'Scaffold N50' cell not found in the table.")
-    
-    if scaffold_n50 is None:
-        raise ValueError(f"Scaffold N50 value not found at {reference_genome_url}")
-    
-    return _convert_to_int(scaffold_n50)
-
-def _convert_to_int(value_str):
-    """
-    Converts a string with units to an integer.
-    
-    Parameters:
-    value_str (str): The string containing the numeric value and units (e.g., "5.3 Mb").
-    
-    Returns:
-    int: The numeric value in base units.
-    """
-    units = {'Kb': 1e3, 'Mb': 1e6, 'Gb': 1e9}
-    value, unit = value_str.split()
-    return int(float(value) * units[unit])
