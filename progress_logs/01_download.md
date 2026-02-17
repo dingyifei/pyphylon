@@ -164,6 +164,84 @@ MSYS_NO_PATHCONV=1 wsl -d pangenome -- bash -lc "cd /mnt/f/lab_projects/pangenom
 
 ---
 
+## 01f - Investigation: Anomalous Pattern in Unfiltered Strain Plot
+
+**Date**: 2026-02-17 ~02:30 PST
+
+### Summary
+
+Investigated an anomalous pattern in the unfiltered strain plot (genome_length vs. patric_cds) from notebook 1a. A dense vertical column at genome_length ≈ 1.671 Mb and a tight cluster at ≈ 1.729 Mb sit above the main trend line due to contamination-inflated gene counts. All anomalous genomes trace to a single BioProject and are correctly removed by CheckM filtering.
+
+### Key Steps
+
+1. **Identified anomaly**: In the unfiltered strain plot, 63 genomes form two distinct clusters well above the main genome_length-vs-CDS trend line, suggesting inflated gene counts relative to genome size
+2. **Source**: All 63 genomes belong to BioProject PRJNA942088 — a One Health Surveillance study of *C. jejuni* in the Palestinian poultry supply chain (Swiss Tropical and Public Health Institute)
+3. **Two batches with near-identical genome lengths**:
+   - **PS_2021** (47 genomes): genome_length std = 43.5 bp, contamination 10.6–21.9%
+   - **PS_2022** (16 genomes): genome_length std = 7.3 bp, contamination 10.5–13.5%
+4. **Why anomalous**: The extremely low genome length standard deviations (43.5 bp and 7.3 bp across dozens of genomes) suggest these are near-identical backbone assemblies rather than independent assemblies. High contamination (10.5–21.9%) inflates the CDS count, pushing them above the main trend line
+5. **Filtering outcome**: All 63 genomes removed by the CheckM contamination filter (>5% contamination cutoff), accounting for 51.6% of all 122 removed genomes
+6. **Conclusion**: The filtering pipeline is working correctly — no code changes needed. The anomalous pattern in the unfiltered plot is an expected artifact of contaminated assemblies from a single large submission
+
+### Access
+
+```python
+# Reproduce the investigation
+import pandas as pd
+df = pd.read_csv('output/genome_metadata_1a.csv')
+prjna = df[df['bioproject_accession'] == 'PRJNA942088']
+print(f"PRJNA942088 genomes: {len(prjna)}")
+print(f"Contamination range: {prjna['checkm_contamination'].min():.1f}–{prjna['checkm_contamination'].max():.1f}%")
+
+# Check the two batches
+for prefix in ['PS_2021', 'PS_2022']:
+    batch = prjna[prjna['genome_name'].str.contains(prefix)]
+    print(f"{prefix}: n={len(batch)}, genome_length std={batch['genome_length'].std():.1f} bp")
+```
+
+---
+
+## 01g - Create cleanup.sh Helper Script
+
+**Date**: 2026-02-17 ~02:43 PST
+
+### Summary
+
+Created `cleanup.sh` in the project root to selectively remove intermediate files from `temp/` and `output/` directories. Supports phase-based filtering (e.g., `-p 1` for all phase-1 files), directory targeting (`-d output`), protected-file skipping, dry-run previews, and force mode.
+
+### Key Steps
+
+1. Created `cleanup.sh` with argument parsing for `-p <phase>`, `-d <dir>`, `--force`, `--dry-run`, and `-h/--help`
+2. Phase matching: single digit (`-p 1`) matches `1[a-zA-Z]_*`; digit+letter (`-p 1a`) matches `1a_*`
+3. Protected files: items with "protected" in their name (case-insensitive) are skipped by default, only removed with `--force`
+4. `readme.md` is always preserved regardless of flags
+5. Uses `find -maxdepth 1 -mindepth 1` for both files and subdirectories; `rm -rf` for directories, `rm -f` for files
+6. Verified all 5 test cases: full dry-run, phase-1 dry-run, protected-file skip, force mode, temp-only targeting
+
+### Access
+
+```bash
+# Preview all deletions
+./cleanup.sh --dry-run
+
+# Clean all phase-1 files (1a_*, 1b_*, ...)
+./cleanup.sh -p 1
+
+# Clean only 1a_* in output/
+./cleanup.sh -p 1a -d output
+
+# Include protected files
+./cleanup.sh --force
+
+# Preview phase-2 cleanup
+./cleanup.sh -p 2 --dry-run
+
+# Show help
+./cleanup.sh -h
+```
+
+---
+
 ## Notes
 
 - BV-BRC API endpoint: `https://www.bv-brc.org/api/genome/`
