@@ -140,6 +140,30 @@ MSYS_NO_PATHCONV=1 wsl -d pangenome -- bash -lc "cd /mnt/f/lab_projects/pangenom
 
 ---
 
+## 01e - Fix CheckM Filter Eliminating All Genomes
+
+**Date**: 2026-02-17 ~02:07 PST
+
+### Summary
+
+Fixed CheckM contamination/completeness filter eliminating all 578 genomes that survived L50/N50 filtering. Root cause: kneebow auto-threshold is too aggressive for uniform Complete+Good datasets from BV-BRC (contamination scores clustered at 1.8–2.8%), causing the elbow detection to pick a near-zero cutoff. Also fixed a `contig_n50` column assignment bug.
+
+### Key Steps
+
+1. **Root cause**: `contamination_cutoff=None` + `checkm_filter_statuses=('Complete', 'WGS')` sent all 578 Complete genomes through kneebow auto-detection. Since BV-BRC Complete+Good genomes have uniformly low contamination, kneebow found an extremely low elbow, and the strict `<` comparison filtered everything out.
+2. **Fix 1 — Explicit CheckM cutoffs** (`examples/1a_filter_genomes_for_download.ipynb` cell 14): Changed from `contamination_cutoff=None, completeness_cutoff=None` to `contamination_cutoff=5.0, completeness_cutoff=90.0`. These are standard thresholds from Parks et al. (2015) — *CheckM: assessing the quality of microbial genomes recovered from isolates, single cells, and metagenomes* (Genome Research, 25:1043-1055, DOI: 10.1101/gr.186072.114), which defines "near-complete" genomes as >90% completeness and <5% contamination.
+3. **Fix 2 — `contig_n50` column bug** (`pyphylon/qcqa.py` line 114): `filtered_species_summary['contig_n50'] = filtered_species_summary['contig_l50'].astype('int')` was assigning `contig_l50` values to `contig_n50`. Fixed to use `filtered_species_summary['contig_n50'].astype('int')`.
+4. Verified: all 2 qcqa tests pass (`test_filter_by_species`, `test_filter_by_genome_quality`)
+
+### Access
+
+```bash
+# Run tests
+MSYS_NO_PATHCONV=1 wsl -d pangenome -- bash -lc "cd /mnt/f/lab_projects/pangenomics/pyphylon && conda run -n pangenome pytest pyphylon/test/test_qcqa.py -v"
+```
+
+---
+
 ## Notes
 
 - BV-BRC API endpoint: `https://www.bv-brc.org/api/genome/`
