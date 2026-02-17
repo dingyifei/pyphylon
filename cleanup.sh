@@ -21,7 +21,8 @@ Flags:
   --dry-run    Print what would be deleted without deleting
 
 Files named readme.md are always preserved.
-Items with "protected" in their name are skipped unless --force is used.
+Items with "protected" in their name (at any nesting level) are skipped unless
+--force is used. A directory containing a protected descendant is also skipped.
 EOF
     exit "${1:-0}"
 }
@@ -93,13 +94,24 @@ for target in "${targets[@]}"; do
         [[ -z "$item" ]] && continue
         basename="$(basename "$item")"
 
-        # Check protected (case-insensitive)
-        if [[ "${basename,,}" == *protected* && "$force" == false ]]; then
-            skipped_protected=$((skipped_protected + 1))
-            if [[ "$dry_run" == true ]]; then
-                echo "[skip protected] $item"
+        # Check protected (case-insensitive) — skip unless --force
+        if [[ "$force" == false ]]; then
+            # Check the item itself
+            if [[ "${basename,,}" == *protected* ]]; then
+                skipped_protected=$((skipped_protected + 1))
+                if [[ "$dry_run" == true ]]; then
+                    echo "[skip protected] $item"
+                fi
+                continue
             fi
-            continue
+            # For directories, check if any descendant has "protected" in its name
+            if [[ -d "$item" ]] && find "$item" -iname '*protected*' -print -quit 2>/dev/null | grep -q .; then
+                skipped_protected=$((skipped_protected + 1))
+                if [[ "$dry_run" == true ]]; then
+                    echo "[skip protected: contains protected descendant] $item"
+                fi
+                continue
+            fi
         fi
 
         if [[ "$dry_run" == true ]]; then
