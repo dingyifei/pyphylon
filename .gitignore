@@ -1,4 +1,6 @@
-# Byte-compiled / optimized / DLL files
+/.wsl
+
+compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -165,3 +167,4 @@ examples/deprecated/*
 workflow/.snakemake/*
 
 examples/config.py
+/.idea

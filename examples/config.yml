@@ -1,0 +1,14 @@
+
+WORKDIR: "data/"
+SPECIES_NAME: "Campylobacter jejuni"
+DEBUG: True
+PG_NAME: "CJejuni"
+TAXON_ID: 197
+
+METADATA_FILE: "data/metadata/genome_metadata_Oct_12_23_fixed.tsv"
+GENOMES_FILE: "data/metadata/genome_summary_Oct_12_23.tsv"
+FILTERED_GENOMES_FILE: "data/interim/mash_scrubbed_species_metadata_2b.csv"
+
+
+REUSE_TEMP: True
+REUSE_TEMP_DIR: "../temp/"

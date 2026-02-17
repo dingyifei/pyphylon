@@ -23,6 +23,20 @@ GENOME_METADATA_URL = "https://zenodo.org/record/11226678/files/genome_metadata_
 # Valid filetype options for BV-BRC genome sequence downloads
 VALID_BV_BRC_FILES = ['faa','features.tab','ffn','frn','gff','pathway.tab', 'spgene.tab','subsystem.tab','fna']
 
+# BV-BRC HTTPS Data API (replaces FTP which now requires SSL/TLS on control channel)
+BV_BRC_API_BASE = "https://www.bv-brc.org/api"
+BV_BRC_API_ENDPOINTS = {
+    'fna': ('genome_sequence', 'application/sralign+dna+fasta'),
+    'gff': ('genome_feature', 'application/gff'),
+    'faa': ('genome_feature', 'application/protein+fasta'),
+    'ffn': ('genome_feature', 'application/dna+fasta'),
+    'frn': ('genome_feature', 'application/dna+fasta'),
+    'features.tab': ('genome_feature', 'text/tsv'),
+    'pathway.tab': ('pathway', 'text/tsv'),
+    'spgene.tab': ('sp_gene', 'text/tsv'),
+    'subsystem.tab': ('subsystem', 'text/tsv'),
+}
+
 
 
 # TODO: Add in checks from 1b and deduplication
@@ -281,40 +295,45 @@ def download_genomes_bvbrc(genomes, output_dir, filetypes=['fna','gff'], force=F
             logging.info(f"Invalid filetype: {ftype}")
             continue
     
-    # Download relevant files
+    # Download relevant files via BV-BRC HTTPS Data API
     for genome in tqdm(genomes, desc='Downloading selected files...', total=len(genomes)):
-        # Set up source and target locations
-        genome_source = f"ftp://ftp.bvbrc.org/genomes/{genome}/{genome}" # base link to genome files
-
-        # Process individual files
         for source_filetype, target_filetype in source_target_filetypes:
-            source = f"{genome_source}.{source_filetype}"
-            genome_target = os.path.join(subdir[target_filetype], genome)
-            target = f"{genome_target}.{target_filetype}"
+            target = os.path.join(subdir[target_filetype], f"{genome}.{target_filetype}")
 
             if os.path.exists(target) and not force:
                 logging.info(f"File {target} already exists and force is False. Skipping download.")
-            else:
-                logging.info(f"{source} -> {target}")
-                # Try to download file
-                try:                    
-                    urllib.request.urlretrieve(source, target)
-                    urllib.request.urlcleanup()
-                # genome ID not found
-                except IOError:
-                    logging.warning(f"Bad genome ID: {genome}")
-                    if os.path.exists(target):
-                        os.remove(target)
+                continue
+
+            # Look up the API endpoint and accept header for this filetype
+            api_resource, accept_header = BV_BRC_API_ENDPOINTS[target_filetype]
+            url = (
+                f"{BV_BRC_API_BASE}/{api_resource}/"
+                f"?eq(genome_id,{genome})&http_accept={accept_header}&limit(25000)"
+            )
+
+            logging.info(f"Downloading {target_filetype} for {genome} via HTTPS API...")
+            try:
+                req = urllib.request.Request(url)
+                with urllib.request.urlopen(req) as response:
+                    data = response.read()
+                if not data:
+                    logging.warning(f"Empty response for {target_filetype} of genome {genome}")
                     bad_genomes.append(genome)
+                    continue
+                with open(target, 'wb') as f:
+                    f.write(data)
+            except (urllib.error.HTTPError, urllib.error.URLError) as e:
+                logging.warning(f"Failed to download {target_filetype} for genome {genome}: {e}")
+                if os.path.exists(target):
+                    os.remove(target)
+                bad_genomes.append(genome)
 
     # Remove related "bad" genome files:
     for bad_genome in tqdm(bad_genomes, desc='Removing bad genome files...'):
         for ftype, subdir_path in subdir.items():
-            bad_genome_path = os.path.join(subdir_path, f"{genome}.{ftype}")
+            bad_genome_path = os.path.join(subdir_path, f"{bad_genome}.{ftype}")
             if os.path.exists(bad_genome_path):
                 os.remove(bad_genome_path)
-            else:
-                continue
     
     # Return a list of bad genomes that failed to download
     return bad_genomes
