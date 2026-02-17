@@ -107,6 +107,63 @@ def download_example_bvbrc_genome_info(output_dir=None, force=False):
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to download {filename}: {e}")
 
+
+def query_bvbrc_genomes(taxon_id, genome_status=None, genome_quality=None, limit=25000):
+    """
+    Query BV-BRC API for genomes by taxon ID (includes all descendant taxa).
+
+    Parameters:
+    - taxon_id (int/str): NCBI taxonomy ID (e.g., 197 for C. jejuni)
+    - genome_status (str, optional): Filter by status ('Complete', 'WGS')
+    - genome_quality (str, optional): Filter by quality ('Good', 'Fair', 'Poor')
+    - limit (int): Max records per request (default 25000)
+
+    Returns:
+    - pd.DataFrame: Genome records from BV-BRC
+    """
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    base_url = "https://www.bv-brc.org/api/genome/"
+
+    # Build RQL query — use taxon_lineage_ids to include subspecies/strains
+    rql_parts = [f"eq(taxon_lineage_ids,{taxon_id})"]
+    if genome_status is not None:
+        rql_parts.append(f"eq(genome_status,{genome_status})")
+    if genome_quality is not None:
+        rql_parts.append(f"eq(genome_quality,{genome_quality})")
+
+    all_records = []
+    offset = 0
+
+    while True:
+        rql_query = "&".join(rql_parts + [f"limit({limit},{offset})"])
+        url = f"{base_url}?{rql_query}"
+        headers = {"Accept": "application/json"}
+
+        logging.info(f"Querying BV-BRC API (offset={offset})...")
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+
+        records = response.json()
+        if not records:
+            break
+
+        all_records.extend(records)
+        logging.info(f"Retrieved {len(records)} records (total: {len(all_records)})")
+
+        if len(records) < limit:
+            break
+        offset += limit
+
+    if not all_records:
+        logging.warning(f"No genomes found for taxon_id={taxon_id}")
+        return pd.DataFrame()
+
+    df = pd.DataFrame(all_records)
+    logging.info(f"Total genomes retrieved: {df.shape[0]}")
+    return df
+
+
 # Genome sequence downloads
 def download_genome_sequences(df_or_filepath: Union[str, pd.DataFrame], output_dir, force=False):
     """
