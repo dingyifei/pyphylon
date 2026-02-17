@@ -1,5 +1,6 @@
 
 WORKDIR: "../temp/"
+SNAKEMAKE_DATA_DIR: "data/"
 SPECIES_NAME: "Campylobacter jejuni"
 DEBUG: False
 PG_NAME: "CJejuni"
@@ -7,7 +8,7 @@ TAXON_ID: 197
 
 METADATA_FILE: "data/metadata/genome_metadata_Oct_12_23_fixed.tsv"
 GENOMES_FILE: "data/metadata/genome_summary_Oct_12_23.tsv"
-FILTERED_GENOMES_FILE: "output/2b_genome_metadata.csv"
+FILTERED_GENOMES_FILE: "../temp/2b_genome_metadata.csv"
 
 
 REUSE_TEMP: True
