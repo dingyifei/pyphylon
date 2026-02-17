@@ -176,3 +176,4 @@ workflow/.snakemake/*
 examples/config.py
 /.idea
 papers/_download_report.json
+.claude/settings.local.json
