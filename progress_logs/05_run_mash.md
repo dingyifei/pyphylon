@@ -51,6 +51,34 @@ Cell 18 had a hardcoded representative strain ID `'1314.132'` from the original 
 
 This makes the notebook organism-agnostic — for *C. jejuni* it resolves to `['192222.6']`.
 
+## Update: Mash Filtering Analysis
+
+**Date**: 2026-02-17 ~5:31 AM PST
+
+Investigated what the 99th-percentile Mash cutoff (0.0257) removes and whether the secondary peak at ~0.03 is worth keeping.
+
+### 5 genomes removed (472 → 467)
+
+| Genome | Dist from ref | Identity | Reason |
+|--------|:---:|----------|--------|
+| `197.24557` | 0.093 | "pure strain" — ~90.7% ANI | Likely mislabeled; below species boundary |
+| `360109.10` | 0.036 | *C. jejuni* subsp. **doylei** 269.97 | Subspecies |
+| `32021.6` | 0.036 | *C. jejuni* subsp. **doylei** FDAARGOS_295 | Subspecies (identical to 360109.10) |
+| `32021.7` | 0.035 | *C. jejuni* subsp. **doylei** NCTC11925 | Subspecies |
+| `197.13319` | 0.028 | *C. jejuni* CJ017CCUA | Borderline; no subsp. label |
+
+### Key findings
+
+- The **0.034–0.042 peak** is caused by 3 subsp. *doylei* genomes cross-pairing with the ~467 subsp. *jejuni* genomes — real biology, not noise.
+- The smooth **0.025–0.030 tail** that persists after filtering is natural intra-*jejuni* diversity.
+- Only 20.3% of pairwise distances in the 0.025–0.04 range involve the 5 filtered genomes; the rest are legitimate *jejuni*-*jejuni* pairs.
+- `197.24557` at 90.7% ANI is almost certainly misclassified (below 95% species boundary).
+- The 3 *doylei* genomes are too few for reliable phylon detection via NMF.
+
+### Decision
+
+Current filtering is appropriate for a subsp. *jejuni*-focused pangenome analysis. The doylei genomes would only be worth retaining if studying cross-subspecies diversity with a larger doylei sample.
+
 ## What's Next
 
 Notebook 2b (`2b_mash_filtration_and_clustering.ipynb`) can now be run — it reads `data/processed/mash/mash_distances.txt` and produces Mash-filtered metadata/summary CSVs in `output/`.

@@ -164,6 +164,10 @@ cython_debug/
 examples/data/*
 examples/deprecated/*
 
+# Pipeline intermediate and output files
+output/
+temp/
+
 # Downloaded paper PDFs
 papers/*.pdf
 
@@ -171,4 +175,4 @@ workflow/.snakemake/*
 
 examples/config.py
 /.idea
-/temp/1b_protected/raw/genomes/fna
+papers/_download_report.json
