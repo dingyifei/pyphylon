@@ -55,11 +55,17 @@ def extract_reference_sequences(cd_hit_results, species, outfile):
                 alleles_to_headers[header] = allele
 
     representative_alleles = []
+    skipped = 0
     with open(cd_hit_results + '/' + species + '.clstr', 'r') as f:
         for line in f:
             if '*' in line:
                 seq = line.split()[2][1:-3]
-                representative_alleles.append(alleles_to_headers[seq])
+                if seq in alleles_to_headers:
+                    representative_alleles.append(alleles_to_headers[seq])
+                else:
+                    skipped += 1
+    if skipped:
+        print(f"Skipped {skipped} representative sequences from filtered-out genomes")
 
     active_allele = None
     with open(cd_hit_results + '/' + species, 'r') as f:
@@ -91,11 +97,17 @@ def extract_reference_dna_sequences(data_path, species, outfile):
 
     
     representative_headers = []
+    skipped = 0
     with open(data_path + 'processed/cd-hit-results' + '/' + species + '.clstr', 'r') as f:
         for line in f:
             if '*' in line:
                 seq = line.split()[2][1:-3]
-                representative_headers.append(seq)
+                if seq in alleles_to_headers:
+                    representative_headers.append(seq)
+                else:
+                    skipped += 1
+    if skipped:
+        print(f"Skipped {skipped} representative sequences from filtered-out genomes")
                 
     
     with open(outfile, 'w') as out:
