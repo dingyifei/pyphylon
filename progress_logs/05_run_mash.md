@@ -79,6 +79,26 @@ Investigated what the 99th-percentile Mash cutoff (0.0257) removes and whether t
 
 Current filtering is appropriate for a subsp. *jejuni*-focused pangenome analysis. The doylei genomes would only be worth retaining if studying cross-subspecies diversity with a larger doylei sample.
 
+## Update: Re-enable Small-Cluster Filtering & Fix KeyError
+
+**Date**: 2026-02-23 ~8:33 PM PST
+
+Two changes to notebook 2b to re-enable small-cluster filtering and fix a resulting KeyError.
+
+### Change 1: Re-enable small-cluster filtering (cell 30)
+
+Changed `small_clst_limit` from `0` to `5`, re-enabling iterative removal of Mash clusters with fewer than 5 members. With the limit at 0, no clusters were being removed; setting it to 5 drops singleton and small clusters that lack enough genomes for meaningful phylon analysis.
+
+### Change 2: Fix KeyError on metadata join (cell 43)
+
+After small-cluster filtering removes 95 genomes (468 → 373), the cluster-assignment join in cell 43 failed with a `KeyError` because `mash_scrubbed_metadata` and `mash_scrubbed_summary` still contained genomes no longer present in `clst`. Added `.loc[..., .isin(clst.index)]` filters on both DataFrames before the join so only surviving genomes are included.
+
+### Results
+
+- **29 final Mash clusters** after small-cluster filtering
+- **373 genomes** surviving filtration (down from 468 post-Mash-distance filtering)
+- Output files (`2b_genome_summary.csv`, `2b_genome_metadata.csv`, `2b_mash_square.csv`, `2b_mash_corr_dist.csv`) updated accordingly
+
 ## What's Next
 
 Notebook 2b (`2b_mash_filtration_and_clustering.ipynb`) can now be run — it reads `data/processed/mash/mash_distances.txt` and produces Mash-filtered metadata/summary CSVs in `output/`.

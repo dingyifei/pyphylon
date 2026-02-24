@@ -31,3 +31,32 @@
 ## Expected Result
 
 Re-running notebook 1a should yield ~493 genomes (471 passing CheckM + 22 null retained) instead of 471.
+
+---
+
+## Re-run: Feb 23, 2026
+
+Notebook 1a was re-run with two parameter changes from the original run.
+
+### Parameter Changes
+
+| Parameter | Previous | Re-run |
+|-----------|----------|--------|
+| `checkm_missing` | `'keep'` | `'drop'` — now drops genomes with null CheckM data |
+| Completeness plot cutoff line | `y=90` | `y=92` — corrected to match actual `completeness_cutoff=92.0` |
+
+### Filtration Results
+
+| Stage | Previous run | Re-run |
+|-------|:---:|:---:|
+| BV-BRC query (Complete+Good) | 594 | 594 |
+| Species filter | 593 | 593 |
+| L50/N50 | 578 | 578 |
+| CheckM filtered out | 85 | 109 |
+| **After notebook 1a** | **493** | **469** |
+
+The 24-genome difference (493 → 469) comes from the 22 null-CheckM genomes now being dropped plus 2 additional genomes caught by the stricter completeness cutoff (92% vs 90%).
+
+### Note
+
+Downstream notebooks (1b, 2a, 2b, etc.) have not been re-run yet with the updated 469-genome set.
