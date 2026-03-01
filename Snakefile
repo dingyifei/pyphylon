@@ -91,7 +91,29 @@ rule nb_2a:
     shell:
         "python notebooks/2a_clean_metadata.py -- --config {input.config}"
 
-# TODO: Add rules for 2b, 2c, 2d
+rule nb_2b:
+    input:
+        config="config.yml",
+        summary=f"{TEMP}/2a_genome_summary.csv",
+        metadata=f"{TEMP}/2a_genome_metadata.csv",
+        mash_dist=f"{TEMP}/2b_mash/mash_distances.txt",
+    output:
+        temp(f"{TEMP}/2b_genome_summary.csv"),
+        temp(f"{TEMP}/2b_genome_metadata.csv"),
+        f"{OUT}/data/2b_mash_square.csv",
+        f"{OUT}/data/2b_mash_corr_dist.csv",
+        f"{FIG}/2b_mash_heatmap.png",
+        f"{FIG}/2b_mash_dist_all.png",
+        f"{FIG}/2b_mash_dist_filtered.png",
+        f"{FIG}/2b_sensitivity_analysis.png",
+        f"{FIG}/2b_clustermap_initial.png",
+        f"{FIG}/2b_clustermap_final.png",
+        f"{FIG}/2b_cluster_sizes_initial.png",
+        f"{FIG}/2b_cluster_sizes_final.png",
+    shell:
+        "python notebooks/2b_mash_filtration.py -- --config {input.config}"
+
+# TODO: Add rules for 2c, 2d
 
 # =============================================================================
 # Bioinformatics: Annotation, MLST, CD-HIT Workflow
@@ -155,5 +177,23 @@ rule report_2a:
         f"{REP}/2a_clean_metadata.pdf"
     shell:
         "quarto render reports/2a_clean_metadata.qmd --to pdf"
+
+rule report_2b:
+    input:
+        f"{TEMP}/2b_genome_metadata.csv",
+        f"{OUT}/data/2b_mash_square.csv",
+        f"{OUT}/data/2b_mash_corr_dist.csv",
+        f"{FIG}/2b_mash_heatmap.png",
+        f"{FIG}/2b_mash_dist_all.png",
+        f"{FIG}/2b_mash_dist_filtered.png",
+        f"{FIG}/2b_sensitivity_analysis.png",
+        f"{FIG}/2b_clustermap_initial.png",
+        f"{FIG}/2b_clustermap_final.png",
+        f"{FIG}/2b_cluster_sizes_initial.png",
+        f"{FIG}/2b_cluster_sizes_final.png",
+    output:
+        f"{REP}/2b_mash_filtration.pdf"
+    shell:
+        "quarto render reports/2b_mash_filtration.qmd --to pdf"
 
 # TODO: Add report rules as notebooks are converted
