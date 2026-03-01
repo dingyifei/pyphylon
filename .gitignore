@@ -168,12 +168,16 @@ examples/deprecated/*
 output/
 temp/
 
-# Downloaded paper PDFs
-papers/*.pdf
-
 workflow/.snakemake/*
 
 examples/config.py
 /.idea
-papers/_download_report.json
+/.vscode
 .claude/settings.local.json
+
+# Marimo cache (persistent_cache data)
+__marimo__/
+notebooks/__marimo__/
+
+# Snakemake
+.snakemake/

@@ -13,7 +13,7 @@ import pandas as pd
 
 from typing import Union
 from Bio import Entrez
-from tqdm.notebook import tqdm
+from tqdm.auto import tqdm
 
 
 # URLs

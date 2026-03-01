@@ -8,7 +8,7 @@ import pandas as pd
 
 from scipy.optimize import nnls
 from joblib import Parallel, delayed
-from tqdm.notebook import trange
+from tqdm.auto import trange
 
 # Files and folders #
 

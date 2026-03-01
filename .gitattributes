@@ -1,0 +1,6 @@
+*.gbff filter=lfs diff=lfs merge=lfs -text
+*.tar.gz filter=lfs diff=lfs merge=lfs -text
+*.pickle.gz filter=lfs diff=lfs merge=lfs -text
+*.fna filter=lfs diff=lfs merge=lfs -text
+*.faa filter=lfs diff=lfs merge=lfs -text
+*.msh filter=lfs diff=lfs merge=lfs -text

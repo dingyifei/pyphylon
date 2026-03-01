@@ -7,7 +7,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import gzip
 import pickle
-from tqdm.notebook import tqdm, trange
+from tqdm.auto import tqdm, trange
 from IPython.display import display, HTML
 import plotly.graph_objects as go
 import scipy

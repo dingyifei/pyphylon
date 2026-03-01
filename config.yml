@@ -1,0 +1,28 @@
+# pyphylon-marimo unified configuration
+# This config is read by both marimo notebooks and the master Snakefile
+
+# --- Directories ---
+TEMP_DIR: "temp/"
+OUTPUT_DIR: "output/"
+DATA_DIR: "data/"
+INPUT_DIR: "input/"
+FIGURES_DIR: "output/figures/"
+REPORTS_DIR: "output/reports/"
+SNAKEMAKE_DATA_DIR: "data/"
+
+# --- Species ---
+SPECIES_NAME: "Campylobacter jejuni"
+PG_NAME: "CJejuni"
+TAXON_ID: 197
+
+# --- Options ---
+DEBUG: false
+REUSE_TEMP: true
+
+# --- Analysis Parameters ---
+MASH_RANK: 16
+SMALL_CLUSTER_LIMIT: 5
+
+# --- Legacy compatibility (maps to original config keys) ---
+WORKDIR: "temp/"
+FILTERED_GENOMES_FILE: "temp/2b_genome_metadata.csv"

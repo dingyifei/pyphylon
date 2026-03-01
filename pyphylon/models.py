@@ -7,7 +7,7 @@ from pyexpat import model
 import numpy as np
 import pandas as pd
 from typing import Iterable, Union, List, Tuple, Dict, Any, Optional
-from tqdm.notebook import tqdm, trange
+from tqdm.auto import tqdm, trange
 from sklearn.decomposition import NMF
 from sklearn.cluster import KMeans
 from sklearn.metrics import confusion_matrix, silhouette_score

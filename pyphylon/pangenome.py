@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 import scipy.sparse
 
-from tqdm.notebook import tqdm
+from tqdm.auto import tqdm
 
 CLUSTER_TYPES = {'cds':'C', 'noncoding':'T'}
 VARIANT_TYPES = {'allele':'A', 'upstream':'U', 'downstream':'D'}

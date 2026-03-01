@@ -5,7 +5,7 @@ General utility functions for the pyphylon package.
 import os
 import numpy as np
 import pandas as pd
-from tqdm.notebook import trange
+from tqdm.auto import trange
 
 # Files and folders #
 

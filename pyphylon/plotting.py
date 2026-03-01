@@ -8,7 +8,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import gzip
 import pickle
-from tqdm.notebook import tqdm, trange
+from tqdm.auto import tqdm, trange
 import multiprocessing
 from IPython.display import display, HTML
 import itertools

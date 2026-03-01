@@ -1,0 +1,3 @@
+[submodule "data"]
+	path = data
+	url = /Users/yifeiding/projects/lab/pangenomics/pyphylon-marimo-data.git
