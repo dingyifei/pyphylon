@@ -80,7 +80,18 @@ rule nb_1b:
 # Phase 2: Mash Filtration & Pangenome Construction
 # =============================================================================
 
-# TODO: Add rules for 2a, 2b, 2c, 2d
+rule nb_2a:
+    input:
+        config="config.yml",
+        summary=f"{TEMP}/1b_genome_summary.csv",
+        metadata=f"{TEMP}/1b_genome_metadata.csv",
+    output:
+        temp(f"{TEMP}/2a_genome_summary.csv"),
+        temp(f"{TEMP}/2a_genome_metadata.csv"),
+    shell:
+        "python notebooks/2a_clean_metadata.py -- --config {input.config}"
+
+# TODO: Add rules for 2b, 2c, 2d
 
 # =============================================================================
 # Bioinformatics: Annotation, MLST, CD-HIT Workflow
@@ -135,5 +146,14 @@ rule report_1b:
         f"{REP}/1b_genome_download.pdf"
     shell:
         "quarto render reports/1b_genome_download.qmd --to pdf"
+
+rule report_2a:
+    input:
+        f"{TEMP}/2a_genome_summary.csv",
+        f"{TEMP}/2a_genome_metadata.csv",
+    output:
+        f"{REP}/2a_clean_metadata.pdf"
+    shell:
+        "quarto render reports/2a_clean_metadata.qmd --to pdf"
 
 # TODO: Add report rules as notebooks are converted

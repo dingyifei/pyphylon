@@ -8,23 +8,23 @@ Pyphylon is a Python bioinformatics package for analyzing and visualizing co-occ
 
 ## Development Commands
 
-### Environment Setup
+### Environment Setup (macOS)
 
-**Note**: Development environment uses PowerShell on Windows with WSL containers for Docker/conda workflows.
+**Conda environment**: `pyphylon-marimo` (miniconda, Python 3.x, marimo 0.20.2, pandas 3.0.0)
 
 ```bash
-# Clone and install in development mode
-git clone https://github.com/SBRG/pyphylon.git
-cd pyphylon
-pip install -r requirements.txt
-pip install -e .
+# Activate the environment
+conda activate pyphylon-marimo
 
-# Optional: Install with extras
-pip install -e .[cd-hit,tests]
+# Run a marimo notebook headlessly
+conda run -n pyphylon-marimo python notebooks/1a_filter_genomes.py -- --config config.yml
 
-# Using conda environment (miniforge available in WSL)
-conda env create -f conda/environment.yml
-conda activate pyphylon
+# Run a marimo notebook interactively
+conda run -n pyphylon-marimo marimo edit notebooks/1a_filter_genomes.py
+
+# Lint and format
+conda run -n pyphylon-marimo ruff check notebooks/
+conda run -n pyphylon-marimo ruff format notebooks/
 ```
 
 ### Cleanup

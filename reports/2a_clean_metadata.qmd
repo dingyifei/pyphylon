@@ -1,0 +1,28 @@
+---
+title: "2a: Metadata De-duplication Report"
+---
+
+## Overview
+
+This report summarizes the metadata de-duplication step, which removes duplicate genome entries based on `biosample_accession` before Mash filtration.
+
+## Input Summary
+
+```{python}
+import pandas as pd
+
+input_summary = pd.read_csv("../temp/1b_genome_summary.csv", dtype={"genome_id": str})
+input_metadata = pd.read_csv("../temp/1b_genome_metadata.csv", dtype={"genome_id": str})
+print(f"Input genomes (from 1b): {input_summary.shape[0]}")
+```
+
+## De-duplication Results
+
+```{python}
+dedup_summary = pd.read_csv("../temp/2a_genome_summary.csv", dtype={"genome_id": str})
+dedup_metadata = pd.read_csv("../temp/2a_genome_metadata.csv", dtype={"genome_id": str})
+
+n_removed = input_metadata.shape[0] - dedup_metadata.shape[0]
+print(f"Duplicates removed: {n_removed}")
+print(f"Genomes after de-duplication: {dedup_summary.shape[0]}")
+```
