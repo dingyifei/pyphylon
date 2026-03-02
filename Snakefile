@@ -145,7 +145,22 @@ rule nb_2d:
 # Phase 3: Genome Characterization
 # =============================================================================
 
-# TODO: Add rules for 3a, 3b
+rule nb_3a:
+    input:
+        config="config.yml",
+        pickle=f"{DATA}/processed/cd-hit-results/{SPECIES}_strain_by_gene.pickle.gz",
+        metadata=f"{TEMP}/2d_enriched_metadata.csv",
+    output:
+        f"{DATA}/processed/CAR_genomes/df_core.csv",
+        f"{DATA}/processed/CAR_genomes/df_acc.csv",
+        f"{DATA}/processed/CAR_genomes/df_rare.csv",
+        f"{FIG}/3a_gene_frequency.png",
+        f"{FIG}/3a_pangenome_segments.png",
+        f"{OUT}/data/3a_car_summary.csv",
+    shell:
+        "python notebooks/3a_extract_CAR.py -- --config {input.config}"
+
+# TODO: Add rule for 3b
 
 # =============================================================================
 # Phase 4: NMF Decomposition
@@ -234,5 +249,18 @@ rule report_2d:
         f"{REP}/2d_enrich_metadata.pdf"
     shell:
         "quarto render reports/2d_enrich_metadata.qmd --to pdf"
+
+rule report_3a:
+    input:
+        f"{DATA}/processed/CAR_genomes/df_core.csv",
+        f"{DATA}/processed/CAR_genomes/df_acc.csv",
+        f"{DATA}/processed/CAR_genomes/df_rare.csv",
+        f"{FIG}/3a_gene_frequency.png",
+        f"{FIG}/3a_pangenome_segments.png",
+        f"{OUT}/data/3a_car_summary.csv",
+    output:
+        f"{REP}/3a_extract_CAR.pdf"
+    shell:
+        "quarto render reports/3a_extract_CAR.qmd --to pdf"
 
 # TODO: Add report rules as notebooks are converted
