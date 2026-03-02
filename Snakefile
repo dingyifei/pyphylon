@@ -160,7 +160,16 @@ rule nb_3a:
     shell:
         "python notebooks/3a_extract_CAR.py -- --config {input.config}"
 
-# TODO: Add rule for 3b
+rule nb_3b:
+    input:
+        config="config.yml",
+        pickle=f"{DATA}/processed/cd-hit-results/{SPECIES}_strain_by_gene.pickle.gz",
+        metadata=f"{TEMP}/2d_enriched_metadata.csv",
+    output:
+        f"{FIG}/3b_heaps_law.png",
+        f"{OUT}/data/3b_heaps_summary.csv",
+    shell:
+        "python notebooks/3b_heaps_plot.py -- --config {input.config}"
 
 # =============================================================================
 # Phase 4: NMF Decomposition
@@ -262,5 +271,14 @@ rule report_3a:
         f"{REP}/3a_extract_CAR.pdf"
     shell:
         "quarto render reports/3a_extract_CAR.qmd --to pdf"
+
+rule report_3b:
+    input:
+        f"{FIG}/3b_heaps_law.png",
+        f"{OUT}/data/3b_heaps_summary.csv",
+    output:
+        f"{REP}/3b_heaps_plot.pdf"
+    shell:
+        "quarto render reports/3b_heaps_plot.qmd --to pdf"
 
 # TODO: Add report rules as notebooks are converted

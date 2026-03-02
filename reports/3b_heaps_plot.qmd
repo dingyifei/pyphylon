@@ -1,0 +1,22 @@
+---
+title: "3b: Heaps' Law — Pangenome Growth Analysis"
+format:
+  pdf:
+    toc: true
+execute:
+  echo: false
+---
+
+## Summary
+
+Heaps' law models pangenome growth as genomes are accumulated: $G(n) = \kappa \cdot n^\gamma$. A gamma (lambda) value below 1 indicates an open pangenome where new genes continue to appear as more genomes are added.
+
+```{python}
+import pandas as pd
+summary = pd.read_csv("../output/data/3b_heaps_summary.csv")
+summary
+```
+
+## Heaps' Law Stacked Plot
+
+![](../output/figures/3b_heaps_law.png){width=90%}
