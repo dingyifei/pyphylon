@@ -1,0 +1,64 @@
+---
+title: "5d: Gene Alignment Visualization"
+format:
+  pdf:
+    toc: true
+execute:
+  echo: false
+---
+
+## Summary
+
+Gene order standardization aligns genes across Complete genomes using anchor genes
+(genes appearing exactly once in every strain). Strains are grouped by gene order
+consistency, reversed if needed, and rotated to start at gene 1.
+
+```{python}
+import pandas as pd
+summary = pd.read_csv("../output/data/5d_gene_alignment_summary.csv")
+for _, row in summary.iterrows():
+    print(f"  {row['metric']}: {int(row['value'])}")
+```
+
+## Genetic Variation
+
+Variation types identified by comparing each strain's gene order to the reference.
+
+```{python}
+variation = pd.read_csv("../output/data/5d_genetic_variation.csv")
+print(f"Total strains analyzed: {len(variation)}\n")
+print(variation["Variation"].value_counts().to_string())
+```
+
+## Gene Length Distribution
+
+Histogram of gene counts per Complete genome after GFF parsing.
+
+![](../output/figures/5d_gene_length_distribution.png){width=80%}
+
+## Circular Genome Plots
+
+Circular plots show gene positions for each phylon. Orange/coral segments indicate
+phylon-specific genes; blue segments indicate anchor genes (conserved single-copy
+genes used for ordering).
+
+```{python}
+#| output: asis
+from pathlib import Path
+circ_files = sorted(Path("../output/figures/").glob("5d_circular_*.png"))
+for cf in circ_files:
+    phylon = cf.stem.replace("5d_circular_", "")
+    print(f"### {phylon}\n")
+    print(f"![](../{cf}){{width=70%}}\n")
+```
+
+## Unique Genes by Phylon
+
+Genes that belong exclusively to a single phylon (not shared with any other).
+
+```{python}
+unique = pd.read_csv("../output/data/5d_unique_genes_by_phylon.csv")
+print(f"Total unique gene-phylon pairs: {len(unique)}\n")
+print("Top 10 phylons by unique gene count:")
+print(unique.groupby("phylon").size().sort_values(ascending=False).head(10).to_string())
+```

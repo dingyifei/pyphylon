@@ -236,7 +236,22 @@ rule nb_5c:
     shell:
         "python notebooks/5c_functional_enrichments.py -- --config {input.config}"
 
-# TODO: Add rules for 5d-5f
+rule nb_5d:
+    input:
+        config="config.yml",
+        L_binarized=f"{DATA}/processed/nmf-outputs/L_binarized.csv",
+        A_binarized=f"{DATA}/processed/nmf-outputs/A_binarized.csv",
+        pickle=f"{DATA}/processed/cd-hit-results/{SPECIES}_strain_by_gene.pickle.gz",
+        metadata=f"{TEMP}/2d_enriched_metadata.csv",
+    output:
+        f"{FIG}/5d_gene_length_distribution.png",
+        f"{OUT}/data/5d_genetic_variation.csv",
+        f"{OUT}/data/5d_gene_alignment_summary.csv",
+        f"{OUT}/data/5d_unique_genes_by_phylon.csv",
+    shell:
+        "python notebooks/5d_gene_alignment.py -- --config {input.config}"
+
+# TODO: Add rules for 5e-5f
 
 # =============================================================================
 # Bioinformatics: Infer Affinities Workflow
@@ -377,5 +392,16 @@ rule report_5c:
         f"{REP}/5c_functional_enrichments.pdf"
     shell:
         "quarto render reports/5c_functional_enrichments.qmd --to pdf"
+
+rule report_5d:
+    input:
+        f"{FIG}/5d_gene_length_distribution.png",
+        f"{OUT}/data/5d_genetic_variation.csv",
+        f"{OUT}/data/5d_gene_alignment_summary.csv",
+        f"{OUT}/data/5d_unique_genes_by_phylon.csv",
+    output:
+        f"{REP}/5d_gene_alignment.pdf"
+    shell:
+        "quarto render reports/5d_gene_alignment.qmd --to pdf"
 
 # TODO: Add report rules as notebooks are converted

@@ -115,8 +115,7 @@ def plot_circular_genome(list1, list2, title, strain, dpi=300, figsize=(600, 600
         plot_bgcolor='white'
     )
 
-    # Show the plot
-    fig.show()
+    return fig
 
 def plot_combined_circular_genomes_with_variaton_and_unique_genes(figures, titles, phylon, figsize=(1500, 500), save_path=None, dpi=300, show = False):
     # Create a subplot layout with 1 row and len(figures) columns
