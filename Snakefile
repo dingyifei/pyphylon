@@ -183,8 +183,6 @@ rule nb_4a:
     output:
         f"{DATA}/processed/nmf-outputs/L.csv",
         f"{DATA}/processed/nmf-outputs/A.csv",
-        f"{DATA}/processed/nmf-outputs/L_binarized.csv",
-        f"{DATA}/processed/nmf-outputs/A_binarized.csv",
         f"{FIG}/4a_mca_variance.png",
         f"{FIG}/4a_consensus_clustermap.png",
         f"{FIG}/4a_consensus_clustermap_filtered.png",
@@ -197,7 +195,26 @@ rule nb_4a:
 # Phase 5: Phylon Analysis
 # =============================================================================
 
-# TODO: Add rules for 5a-5f
+rule nb_5a:
+    input:
+        config="config.yml",
+        L=f"{DATA}/processed/nmf-outputs/L.csv",
+        A=f"{DATA}/processed/nmf-outputs/A.csv",
+        acc=f"{DATA}/processed/CAR_genomes/df_acc.csv",
+        metadata=f"{TEMP}/2d_enriched_metadata.csv",
+    output:
+        f"{DATA}/processed/nmf-outputs/L_norm.csv",
+        f"{DATA}/processed/nmf-outputs/A_norm.csv",
+        f"{DATA}/processed/nmf-outputs/L_binarized.csv",
+        f"{DATA}/processed/nmf-outputs/A_binarized.csv",
+        f"{FIG}/5a_regression.png",
+        f"{FIG}/5a_L_binarized_sorted.png",
+        f"{FIG}/5a_A_binarized_sorted.png",
+        f"{OUT}/data/5a_phylon_summary.csv",
+    shell:
+        "python notebooks/5a_phylon_characterization.py -- --config {input.config}"
+
+# TODO: Add rules for 5b-5f
 
 # =============================================================================
 # Bioinformatics: Infer Affinities Workflow
@@ -308,5 +325,16 @@ rule report_4a:
         f"{REP}/4a_nmf_decomposition.pdf"
     shell:
         "quarto render reports/4a_nmf_decomposition.qmd --to pdf"
+
+rule report_5a:
+    input:
+        f"{FIG}/5a_regression.png",
+        f"{FIG}/5a_L_binarized_sorted.png",
+        f"{FIG}/5a_A_binarized_sorted.png",
+        f"{OUT}/data/5a_phylon_summary.csv",
+    output:
+        f"{REP}/5a_phylon_characterization.pdf"
+    shell:
+        "quarto render reports/5a_phylon_characterization.qmd --to pdf"
 
 # TODO: Add report rules as notebooks are converted
