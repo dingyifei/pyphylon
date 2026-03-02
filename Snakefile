@@ -175,7 +175,23 @@ rule nb_3b:
 # Phase 4: NMF Decomposition
 # =============================================================================
 
-# TODO: Add rule for 4a
+rule nb_4a:
+    input:
+        config="config.yml",
+        acc=f"{DATA}/processed/CAR_genomes/df_acc.csv",
+        metadata=f"{TEMP}/2d_enriched_metadata.csv",
+    output:
+        f"{DATA}/processed/nmf-outputs/L.csv",
+        f"{DATA}/processed/nmf-outputs/A.csv",
+        f"{DATA}/processed/nmf-outputs/L_binarized.csv",
+        f"{DATA}/processed/nmf-outputs/A_binarized.csv",
+        f"{FIG}/4a_mca_variance.png",
+        f"{FIG}/4a_consensus_clustermap.png",
+        f"{FIG}/4a_consensus_clustermap_filtered.png",
+        f"{OUT}/data/4a_nmf_summary.csv",
+        f"{OUT}/data/4a_consensus_clusters.csv",
+    shell:
+        "python notebooks/4a_nmf_decomposition.py -- --config {input.config}"
 
 # =============================================================================
 # Phase 5: Phylon Analysis
@@ -280,5 +296,17 @@ rule report_3b:
         f"{REP}/3b_heaps_plot.pdf"
     shell:
         "quarto render reports/3b_heaps_plot.qmd --to pdf"
+
+rule report_4a:
+    input:
+        f"{DATA}/processed/nmf-outputs/L.csv",
+        f"{FIG}/4a_mca_variance.png",
+        f"{FIG}/4a_consensus_clustermap.png",
+        f"{FIG}/4a_consensus_clustermap_filtered.png",
+        f"{OUT}/data/4a_nmf_summary.csv",
+    output:
+        f"{REP}/4a_nmf_decomposition.pdf"
+    shell:
+        "quarto render reports/4a_nmf_decomposition.qmd --to pdf"
 
 # TODO: Add report rules as notebooks are converted
