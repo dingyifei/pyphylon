@@ -125,7 +125,15 @@ rule nb_2c:
     shell:
         "python notebooks/2c_build_pangenome.py -- --config {input.config}"
 
-# TODO: Add rule for 2d
+rule nb_2d:
+    input:
+        config="config.yml",
+        metadata=f"{TEMP}/2b_genome_metadata.csv",
+        mlst=f"{DATA}/processed/mlst_report.txt",
+    output:
+        temp(f"{TEMP}/2d_enriched_metadata.csv"),
+    shell:
+        "python notebooks/2d_enrich_metadata.py -- --config {input.config}"
 
 # =============================================================================
 # Bioinformatics: Annotation, MLST, CD-HIT Workflow
@@ -218,5 +226,13 @@ rule report_2c:
         f"{REP}/2c_build_pangenome.pdf"
     shell:
         "quarto render reports/2c_build_pangenome.qmd --to pdf"
+
+rule report_2d:
+    input:
+        f"{TEMP}/2d_enriched_metadata.csv",
+    output:
+        f"{REP}/2d_enrich_metadata.pdf"
+    shell:
+        "quarto render reports/2d_enrich_metadata.qmd --to pdf"
 
 # TODO: Add report rules as notebooks are converted
