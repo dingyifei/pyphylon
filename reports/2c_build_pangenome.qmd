@@ -1,0 +1,21 @@
+---
+title: "2c: CDS Pangenome Construction Report"
+---
+
+## Overview
+
+This report summarizes the CDS pangenome construction step, which clusters protein sequences from BAKTA-annotated genomes using CD-HIT to produce gene and allele presence/absence matrices.
+
+## Pangenome Summary
+
+```{python}
+import pandas as pd
+
+summary = pd.read_csv("../output/data/2c_pangenome_summary.csv")
+for _, row in summary.iterrows():
+    print(f"{row['metric']}: {row['value']}")
+```
+
+## Genes per Genome Distribution
+
+![](../output/figures/2c_genes_per_genome.png){width=80%}

@@ -113,7 +113,19 @@ rule nb_2b:
     shell:
         "python notebooks/2b_mash_filtration.py -- --config {input.config}"
 
-# TODO: Add rules for 2c, 2d
+rule nb_2c:
+    input:
+        config="config.yml",
+        metadata=f"{TEMP}/2b_genome_metadata.csv",
+    output:
+        f"{DATA}/processed/cd-hit-results/{SPECIES}_strain_by_gene.pickle.gz",
+        f"{DATA}/processed/cd-hit-results/{SPECIES}_strain_by_allele.pickle.gz",
+        f"{FIG}/2c_genes_per_genome.png",
+        f"{OUT}/data/2c_pangenome_summary.csv",
+    shell:
+        "python notebooks/2c_build_pangenome.py -- --config {input.config}"
+
+# TODO: Add rule for 2d
 
 # =============================================================================
 # Bioinformatics: Annotation, MLST, CD-HIT Workflow
@@ -195,5 +207,16 @@ rule report_2b:
         f"{REP}/2b_mash_filtration.pdf"
     shell:
         "quarto render reports/2b_mash_filtration.qmd --to pdf"
+
+rule report_2c:
+    input:
+        f"{DATA}/processed/cd-hit-results/{SPECIES}_strain_by_gene.pickle.gz",
+        f"{DATA}/processed/cd-hit-results/{SPECIES}_strain_by_allele.pickle.gz",
+        f"{FIG}/2c_genes_per_genome.png",
+        f"{OUT}/data/2c_pangenome_summary.csv",
+    output:
+        f"{REP}/2c_build_pangenome.pdf"
+    shell:
+        "quarto render reports/2c_build_pangenome.qmd --to pdf"
 
 # TODO: Add report rules as notebooks are converted
