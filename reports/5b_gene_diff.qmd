@@ -1,0 +1,33 @@
+---
+title: "5b: Gene Differentiation"
+format:
+  pdf:
+    toc: true
+execute:
+  echo: false
+---
+
+## Summary
+
+Hierarchical clustering (Ward's method) of the binarized L matrix reveals
+the relationships between phylons based on shared gene content. The dendrogram
+annotates each split with exclusive gene counts and total split gene counts.
+
+```{python}
+import pandas as pd
+df_stats = pd.read_csv("../output/data/5b_gene_diff_stats.csv", index_col=0)
+df_stats
+```
+
+## Ward Clustering Heatmap
+
+Clustermap of L_binarized (genes x phylons) using Ward's minimum variance linkage.
+
+![](../output/figures/5b_clustermap.png){width=80%}
+
+## Phylon Dendrogram
+
+Annotated dendrogram showing gene differentiation at each split node.
+Labels indicate the number of exclusive genes and total split genes.
+
+![](../output/figures/5b_phylon_dendrogram.png){width=90%}

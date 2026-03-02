@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import gzip
 import pickle
 from tqdm.auto import tqdm, trange
-from IPython.display import display, HTML
+
 import plotly.graph_objects as go
 import scipy
 from collections import defaultdict

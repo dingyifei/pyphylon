@@ -214,7 +214,18 @@ rule nb_5a:
     shell:
         "python notebooks/5a_phylon_characterization.py -- --config {input.config}"
 
-# TODO: Add rules for 5b-5f
+rule nb_5b:
+    input:
+        config="config.yml",
+        L_binarized=f"{DATA}/processed/nmf-outputs/L_binarized.csv",
+    output:
+        f"{FIG}/5b_clustermap.png",
+        f"{FIG}/5b_phylon_dendrogram.png",
+        f"{OUT}/data/5b_gene_diff_stats.csv",
+    shell:
+        "python notebooks/5b_gene_diff.py -- --config {input.config}"
+
+# TODO: Add rules for 5c-5f
 
 # =============================================================================
 # Bioinformatics: Infer Affinities Workflow
@@ -336,5 +347,15 @@ rule report_5a:
         f"{REP}/5a_phylon_characterization.pdf"
     shell:
         "quarto render reports/5a_phylon_characterization.qmd --to pdf"
+
+rule report_5b:
+    input:
+        f"{FIG}/5b_clustermap.png",
+        f"{FIG}/5b_phylon_dendrogram.png",
+        f"{OUT}/data/5b_gene_diff_stats.csv",
+    output:
+        f"{REP}/5b_gene_diff.pdf"
+    shell:
+        "quarto render reports/5b_gene_diff.qmd --to pdf"
 
 # TODO: Add report rules as notebooks are converted
