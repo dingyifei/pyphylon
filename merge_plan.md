@@ -187,16 +187,16 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 13: Notebook 5d — Gene Alignment
-- [ ] **Marimo:** `notebooks/5d_gene_alignment.py`
-- [ ] **Quarto:** `reports/5d_gene_alignment.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/5d_gene_alignment_visualization.ipynb`
-- [ ] Add H1 title + overview (anchor gene alignment, gene order standardization)
-- [ ] Add `## Genetic Variation` before variation cell
-- [ ] Add `## Gene Length Distribution` before histogram
-- [ ] Add `## Circular Genome Plots` + explanation — organize with `mo.ui.tabs()` per phylon
-- [ ] Wrap circular plots with `mo.ui.plotly()` for interactive hover
-- [ ] Add `## Unique Genes by Phylon` — use `mo.ui.table()`
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/5d_gene_alignment.py`
+- [x] **Quarto:** `reports/5d_gene_alignment.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/5d_gene_alignment_visualization.ipynb`
+- [x] Add H1 title + overview (anchor gene alignment, gene order standardization)
+- [x] Add `## Genetic Variation` before variation cell
+- [x] Add `## Gene Length Distribution` before histogram
+- [x] Add `## Circular Genome Plots` + explanation — organize with `mo.ui.tabs()` per phylon
+- [x] Wrap circular plots with `mo.ui.plotly()` for interactive hover
+- [x] Add `## Unique Genes by Phylon` — use `mo.ui.table()`
+- [x] Lint + commit
 
 ### Stage 14: Notebook 5e — BLAST Enrichment
 - [ ] **Marimo:** `notebooks/5e_blast_enrichment.py`
@@ -257,3 +257,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | 2026-03-03 | 10 — nb_5a | `Merge report text into nb_5a` | 8 markdown cells added (H1 + overview, Setup, Load Inputs, Binarize L (3-means), Binarize A (threshold), Sorted L + Sorted A, Gene Frequency vs Phylon Count, Save Outputs); no circular plots in 5a |
 | 2026-03-03 | 11 — nb_5b | `Merge report text into nb_5b` | 7 markdown cells added (H1 + overview, Setup, Load L_binarized, Ward Clustering Heatmap, Phylon Dendrogram, Save Results); split combined plot cell into separate clustermap + dendrogram cells |
 | 2026-03-03 | 12 — nb_5c | `Merge report text into nb_5c` | 9 markdown cells added (H1 + overview, Setup, Load Inputs, Build GO Mapping, Compute Enrichments, Top Enrichments, Enrichment Heatmap, Phylon Wordclouds, Summary); `mo.ui.table()` for enrichment results; `mo.ui.tabs()` for per-phylon wordclouds; removed unused `FIG` param from enrichment cell |
+| 2026-03-03 | 13 — nb_5d | `Merge report text into nb_5d` | 10 markdown cells added (H1 + overview, Setup, Load Inputs, Parse GFF Files, Gene Order Standardization, Genetic Variation, Gene Length Distribution, Circular Genome Plots, Unique Genes by Phylon, Save Results); `mo.ui.tabs()` + `mo.ui.plotly()` for per-phylon circular genome plots; `mo.ui.table()` for unique gene counts |
