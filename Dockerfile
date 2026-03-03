@@ -1,9 +1,9 @@
 FROM snakemake/snakemake:v8.30.0
 WORKDIR /pipeline
 
-# Python scientific stack + BLAST
+# Python scientific stack + BLAST + hdbscan (conda for pre-built C extensions)
 COPY requirements.txt /tmp/requirements.txt
-RUN micromamba install -y -n base -c conda-forge -c bioconda blast less curl wget \
+RUN micromamba install -y -n base -c conda-forge -c bioconda blast less curl wget hdbscan fastcluster \
     && micromamba run -n base pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Quarto + TinyTeX for PDF reports

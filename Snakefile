@@ -45,7 +45,7 @@ rule all:
         f"{REP}/5c_functional_enrichments.pdf",
         f"{REP}/5d_gene_alignment.pdf",
         f"{REP}/5e_blast_enrichment.pdf",
-        f"{REP}/5f_infer_affinities.pdf",
+        # f"{REP}/5f_infer_affinities.pdf",  # excluded: no input strains in data/inferring_affinities/
 
 # =============================================================================
 # Phase 1: Genome Filtering & Download
