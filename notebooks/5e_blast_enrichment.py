@@ -22,6 +22,35 @@ with app.setup:
 
 @app.cell
 def _():
+    mo.md(
+        """
+        # 5e: BLAST Enrichment Analysis
+
+        Compare pangenome representative sequences against external databases
+        to identify functionally relevant genes. This notebook:
+
+        1. **Extracts representative alleles** — one protein and one DNA sequence
+           per CD-HIT gene cluster
+        2. **Searches VFDB** — BLASTs representative proteins against the
+           [Virulence Factor Database](https://www.mgc.ac.cn/VFs/download.htm)
+           (e-value < 1e-5, identity > 80%)
+        3. **Builds a pangenome BLAST DB** — enables custom blastp queries
+           against the full pangenome
+        """
+    )
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Setup
+        """
+    )
+
+
+@app.cell
+def _():
     """Parse config and set up directories."""
     config_path = "config.yml"
     if "--config" in sys.argv:
@@ -40,6 +69,19 @@ def _():
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
 
     return CONFIG, DATA, FIG, OUT, SPECIES, TEMP
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Extract Representative Sequences
+
+        Extract one representative protein and one DNA sequence per CD-HIT gene
+        cluster. These are the longest member of each cluster and serve as the
+        query set for downstream BLAST searches.
+        """
+    )
 
 
 @app.cell
@@ -62,6 +104,23 @@ def _(DATA, SPECIES):
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## VFDB Enrichment Results
+
+        Pangenome representative protein sequences are searched against
+        [VFDB](https://www.mgc.ac.cn/VFs/download.htm) (Virulence Factor
+        Database) using blastp with e-value < 1e-5 and identity > 80%.
+
+        > **Prerequisite:** Download `VFDB_setA_pro.fas` from
+        > <https://www.mgc.ac.cn/VFs/download.htm> and place it in
+        > `data/external/VFDB/`.
+        """
+    )
+
+
+@app.cell
 def _(DATA, prot_seqs):
     """BLAST pangenome representative sequences against VFDB (optional).
 
@@ -79,7 +138,16 @@ def _(DATA, prot_seqs):
         if not os.path.exists(vfdb_results_path):
             blast_localdb_enrichment(vfdb_db, prot_seqs, vfdb_results_path, e_val=1e-5)
         vfdb_results = process_blast_results(vfdb_results_path, e_val=1e-5, percent_identity=80)
-        mo.output.replace(mo.md(f"VFDB BLAST: **{len(vfdb_results)}** hits (e-value < 1e-5, identity > 80%)"))
+        mo.output.replace(
+            mo.vstack([
+                mo.md(
+                    f"VFDB BLAST: **{len(vfdb_results)}** hits "
+                    f"({vfdb_results['query'].nunique()} unique query genes, "
+                    f"{vfdb_results['target'].nunique()} unique VFDB targets)"
+                ),
+                mo.ui.table(vfdb_results, label="VFDB hits"),
+            ])
+        )
     else:
         mo.output.replace(
             mo.md(
@@ -93,12 +161,31 @@ def _(DATA, prot_seqs):
 
 
 @app.cell
-def _(DATA, SPECIES):
-    """Create pangenome BLAST database for custom queries.
+def _():
+    mo.md(
+        """
+        ## Custom Queries
 
-    After running this notebook, you can query the pangenome DB manually:
-        blastp -query your_query.fa -db data/external/PangenomeDB/PangenomeDB -outfmt 6
-    """
+        A pangenome BLAST database is built from the CD-HIT representative
+        sequences. Once created, you can search any protein of interest
+        against the full pangenome from the command line:
+
+        ```bash
+        blastp -query your_query.fa \\
+               -db data/external/PangenomeDB/PangenomeDB \\
+               -outfmt 6 -evalue 1e-5
+        ```
+
+        Example query sequences can be obtained from
+        [UniProt](https://www.uniprot.org/) or
+        [NCBI Protein](https://www.ncbi.nlm.nih.gov/protein/).
+        """
+    )
+
+
+@app.cell
+def _(DATA, SPECIES):
+    """Create pangenome BLAST database for custom queries."""
     pangenome_db = os.path.join(DATA, "external/PangenomeDB/PangenomeDB")
     pangenome_input = os.path.join(DATA, "processed/cd-hit-results", SPECIES)
 
@@ -113,6 +200,15 @@ def _(DATA, SPECIES):
         mo.output.replace(mo.md(f"Pangenome FASTA not found at `{pangenome_input}`, skipping DB creation"))
 
     return (pangenome_db,)
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Save Results
+        """
+    )
 
 
 @app.cell

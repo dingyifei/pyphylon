@@ -199,13 +199,13 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 14: Notebook 5e — BLAST Enrichment
-- [ ] **Marimo:** `notebooks/5e_blast_enrichment.py`
-- [ ] **Quarto:** `reports/5e_blast_enrichment.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/5e_pangenome_local_blastdb_enrichment.ipynb`
-- [ ] Add H1 title + overview (VFDB comparison)
-- [ ] Add `## VFDB Enrichment Results` — use `mo.ui.table()` for hits
-- [ ] Add `## Custom Queries` with blastp command example
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/5e_blast_enrichment.py`
+- [x] **Quarto:** `reports/5e_blast_enrichment.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/5e_pangenome_local_blastdb_enrichment.ipynb`
+- [x] Add H1 title + overview (VFDB comparison)
+- [x] Add `## VFDB Enrichment Results` — use `mo.ui.table()` for hits
+- [x] Add `## Custom Queries` with blastp command example
+- [x] Lint + commit
 
 ### Stage 15: Notebook 5f — Infer Affinities
 - [ ] **Marimo:** `notebooks/5f_infer_affinities.py`
@@ -258,3 +258,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | 2026-03-03 | 11 — nb_5b | `Merge report text into nb_5b` | 7 markdown cells added (H1 + overview, Setup, Load L_binarized, Ward Clustering Heatmap, Phylon Dendrogram, Save Results); split combined plot cell into separate clustermap + dendrogram cells |
 | 2026-03-03 | 12 — nb_5c | `Merge report text into nb_5c` | 9 markdown cells added (H1 + overview, Setup, Load Inputs, Build GO Mapping, Compute Enrichments, Top Enrichments, Enrichment Heatmap, Phylon Wordclouds, Summary); `mo.ui.table()` for enrichment results; `mo.ui.tabs()` for per-phylon wordclouds; removed unused `FIG` param from enrichment cell |
 | 2026-03-03 | 13 — nb_5d | `Merge report text into nb_5d` | 10 markdown cells added (H1 + overview, Setup, Load Inputs, Parse GFF Files, Gene Order Standardization, Genetic Variation, Gene Length Distribution, Circular Genome Plots, Unique Genes by Phylon, Save Results); `mo.ui.tabs()` + `mo.ui.plotly()` for per-phylon circular genome plots; `mo.ui.table()` for unique gene counts |
+| 2026-03-03 | 14 — nb_5e | `Merge report text into nb_5e` | 7 markdown cells added (H1 + overview, Setup, Extract Representative Sequences, VFDB Enrichment Results, Custom Queries with blastp example, Save Results); `mo.ui.table()` for VFDB hits |
