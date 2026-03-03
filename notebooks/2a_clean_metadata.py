@@ -14,6 +14,24 @@ with app.setup:
 
 @app.cell
 def _():
+    mo.md(
+        """
+        # 2a: Clean Metadata
+
+        De-duplicate genome metadata in preparation for **Mash** filtration
+        and clustering. Duplicate entries sharing the same `biosample_accession`
+        are removed so that each biological sample is represented exactly once.
+        """
+    )
+
+
+@app.cell
+def _():
+    mo.md("## Setup")
+
+
+@app.cell
+def _():
     """Parse config and set up directories."""
     config_path = "config.yml"
     if "--config" in sys.argv:
@@ -52,6 +70,19 @@ def _(TEMP):
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## De-duplicate Entries
+
+        Ensure `biosample_accession` is unique — drop rows that share the same
+        biosample so downstream analyses are not biased by redundant sequences.
+        The genome summary table is then synced to match.
+        """
+    )
+
+
+@app.cell
 def _(input_metadata, input_summary):
     """De-duplicate metadata by biosample_accession and sync summary."""
     dedup_metadata = input_metadata.drop_duplicates(subset=["biosample_accession"])
@@ -68,6 +99,11 @@ def _(input_metadata, input_summary):
         )
     )
     return dedup_metadata, dedup_summary
+
+
+@app.cell
+def _():
+    mo.md("## Save Files")
 
 
 @app.cell

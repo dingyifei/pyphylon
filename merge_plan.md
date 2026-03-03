@@ -87,12 +87,12 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 3: Notebook 2a — Clean Metadata
-- [ ] **Marimo:** `notebooks/2a_clean_metadata.py`
-- [ ] **Quarto:** `reports/2a_clean_metadata.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/2a_clean_metadata.ipynb`
-- [ ] Add H1 title + overview (de-duplication by biosample_accession)
-- [ ] Add section headers matching ref notebook flow
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/2a_clean_metadata.py`
+- [x] **Quarto:** `reports/2a_clean_metadata.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/2a_clean_metadata.ipynb`
+- [x] Add H1 title + overview (de-duplication by biosample_accession)
+- [x] Add section headers matching ref notebook flow
+- [x] Lint + commit
 
 ### Stage 4: Notebook 2b — Mash Filtration
 - [ ] **Marimo:** `notebooks/2b_mash_filtration.py`
@@ -247,3 +247,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 |------|-------|--------|-------|
 | 2026-03-03 | 1 — nb_1a | `Merge report text into nb_1a` | 6 markdown cells added (H1, Setup, Plot Unfiltered, Quality Filtering, Filtered Distributions, Save) |
 | 2026-03-03 | 2 — nb_1b | `Merge report text into nb_1b` | 5 markdown cells added (H1, Setup, Download, Update Genome Files, Save); removed unused DEBUG variable |
+| 2026-03-03 | 3 — nb_2a | `Merge report text into nb_2a` | 4 markdown cells added (H1 + overview, Setup, De-duplicate Entries, Save Files) |
