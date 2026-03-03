@@ -145,16 +145,16 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 9: Notebook 4a — NMF Decomposition
-- [ ] **Marimo:** `notebooks/4a_nmf_decomposition.py`
-- [ ] **Quarto:** `reports/4a_nmf_decomposition.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/4a_NMF_decomposition.ipynb`
-- [ ] Add H1 title + overview (NMF, MCA rank selection, consensus clustering)
-- [ ] Add `## MCA Cumulative Variance` before MCA plot
-- [ ] Add `## Consensus Matrix` before consensus clustermap
-- [ ] Add `## Consensus Matrix (Filtered)` + explanation (excludes 50–100%, 75–100% submatrices)
-- [ ] Add `## NMF Output Shapes` before summary
-- [ ] Consider `mo.ui.table()` for NMF summary
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/4a_nmf_decomposition.py`
+- [x] **Quarto:** `reports/4a_nmf_decomposition.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/4a_NMF_decomposition.ipynb`
+- [x] Add H1 title + overview (NMF, MCA rank selection, consensus clustering)
+- [x] Add `## MCA Cumulative Variance` before MCA plot
+- [x] Add `## Consensus Matrix` before consensus clustermap
+- [x] Add `## Consensus Matrix (Filtered)` + explanation (excludes 50–100%, 75–100% submatrices)
+- [x] Add `## NMF Output Shapes` before summary
+- [x] Consider `mo.ui.table()` for NMF summary
+- [x] Lint + commit
 
 ### Stage 10: Notebook 5a — Phylon Characterization
 - [ ] **Marimo:** `notebooks/5a_phylon_characterization.py`
@@ -253,3 +253,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | 2026-03-03 | 6 — nb_2d | `Merge report text into nb_2d` | 5 markdown cells added (H1 + overview, Setup, Load Inputs, MLST Sequence Type Distribution, Save); `mo.ui.table()` for top-20 ST counts |
 | 2026-03-03 | 7 — nb_3a | `Merge report text into nb_3a` | 6 markdown cells added (H1 + overview, Setup, Load Inputs, Gene Frequency Distribution, Pangenome Segment Fitting, Save CAR Classification); `mo.ui.table()` for CAR summary |
 | 2026-03-03 | 8 — nb_3b | `Merge report text into nb_3b` | 3 markdown cells added (H1 + overview with Heaps' formula, Setup, Heaps' Law Stacked Plot) |
+| 2026-03-03 | 9 — nb_4a | `Merge report text into nb_4a` | 7 markdown cells added (H1 + overview, Setup, MCA Cumulative Variance, NMF Decomposition, Consensus Matrix, Consensus Matrix (Filtered), NMF Output Shapes); `mo.ui.table()` for NMF summary |

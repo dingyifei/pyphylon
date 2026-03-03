@@ -76,6 +76,39 @@ with app.setup:
 
 @app.cell
 def _():
+    mo.md(
+        """
+        # 4a: NMF Decomposition — Phylon Identification
+
+        Non-negative Matrix Factorization (NMF) decomposes the accessory genome
+        presence/absence matrix **P** into two lower-rank matrices **L** (genomes × phylons)
+        and **A** (phylons × genes), identifying co-occurring gene sets (phylons).
+
+        **Workflow:**
+
+        1. **MCA rank selection** — Multiple Correspondence Analysis identifies candidate
+           ranks by explained-variance thresholds (70–90 %).
+        2. **NMF screening** — Initial decomposition at MCA-derived ranks, then refinement
+           around the best AIC rank.
+        3. **Submatrix NMF** — Repeat decomposition on gene-frequency submatrices (e.g.
+           0–25 %, 25–50 %, …) to assess robustness.
+        4. **Consensus clustering** — Average connectivity matrices across submatrices and
+           cluster with Ward's method; cophenetic correlation measures cluster stability.
+        """
+    )
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Setup
+        """
+    )
+
+
+@app.cell
+def _():
     """Parse config and set up directories."""
     config_path = "config.yml"
     if "--config" in sys.argv:
@@ -155,6 +188,20 @@ def _(MASH_RANK, df_acc):
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## MCA Cumulative Variance
+
+        MCA captures the dominant axes of variation in the binary presence/absence
+        matrix. Vertical lines mark the number of components needed to explain
+        70 %, 75 %, 80 %, 85 %, and 90 % of the total variance — these become
+        candidate ranks for NMF.
+        """
+    )
+
+
+@app.cell
 def _(FIG, cumulative_variance, threshold):
     """Plot MCA cumulative variance with rank thresholds."""
     n_significant = (cumulative_variance.diff().fillna(cumulative_variance.iloc[0]) > 0.01).sum()
@@ -186,6 +233,24 @@ def _(FIG, cumulative_variance, threshold):
 
     fig_mca.savefig(os.path.join(FIG, "4a_mca_variance.png"), bbox_inches="tight")
     mo.output.replace(fig_mca)
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## NMF Decomposition
+
+        NMF is run in two phases:
+
+        1. **Initial screening** across MCA-derived ranks to find the best AIC.
+        2. **Refinement** — re-run with additional ranks near the best AIC model.
+
+        The same procedure is then repeated on each gene-frequency submatrix
+        (e.g. 0–25 %, 25–50 %) to collect per-submatrix best models for
+        consensus clustering.
+        """
+    )
 
 
 @app.cell
@@ -277,6 +342,20 @@ def _(A_binarized_dict, A_norm_dict, L_binarized_dict, L_norm_dict, P_submatrice
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## Consensus Matrix
+
+        Connectivity matrices from each submatrix decomposition are averaged to
+        build a consensus matrix. Ward's-method clustering is applied, and the
+        cophenetic correlation coefficient measures how faithfully the dendrogram
+        preserves pairwise distances (ideally ≥ 0.7).
+        """
+    )
+
+
+@app.cell
 def _(P_submatrices, best_A_binarized_dict, df_acc):
     """Build consensus matrices (full and filtered) with cophenetic correlation."""
     # Full consensus (exclude only (0,100) which is None)
@@ -305,6 +384,20 @@ def _(P_submatrices, best_A_binarized_dict, df_acc):
         consensus_clst_filt,
         link_filt,
         coph_cor_filt,
+    )
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Consensus Matrix (Filtered)
+
+        The filtered consensus excludes the (50–100 %) and (75–100 %)
+        submatrices, which overlap heavily with core genes and can dilute
+        the accessory-genome signal. Both full and filtered clustermaps are
+        plotted below.
+        """
     )
 
 
@@ -356,6 +449,22 @@ def _(FIG, consensus_clst, consensus_clst_filt, df_consensus, df_consensus_filt,
     fig_bars.savefig(os.path.join(FIG, "4a_consensus_cluster_sizes.png"), bbox_inches="tight")
 
     mo.output.replace(mo.vstack([g_full.fig, g_filt.fig, fig_bars]))
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## NMF Output Shapes
+
+        Final matrices saved for downstream analysis:
+
+        - **L** (genomes × phylons): phylon membership weights per genome
+        - **A** (phylons × genes): gene contribution weights per phylon
+        - **L_binarized / A_binarized**: thresholded binary assignments
+        - **Consensus clusters**: Ward-clustered genome groups from filtered consensus
+        """
+    )
 
 
 @app.cell
@@ -413,16 +522,19 @@ def _(
     _summary.to_csv(os.path.join(OUT, "data", "4a_nmf_summary.csv"), index=False)
 
     mo.output.replace(
-        mo.md(
-            f"Saved NMF outputs:\n\n"
-            f"- `{_nmf_dir}/L.csv` — L_norm ({best_L_norm_dict['full'].shape})\n"
-            f"- `{_nmf_dir}/A.csv` — A_norm ({best_A_norm_dict['full'].shape})\n"
-            f"- `{_nmf_dir}/L_binarized.csv` ({best_L_binarized_dict['full'].shape})\n"
-            f"- `{_nmf_dir}/A_binarized.csv` ({best_A_binarized_dict['full'].shape})\n"
-            f"- `{os.path.join(OUT, 'data')}/4a_consensus_clusters.csv` ({_consensus_out.shape[0]} genomes)\n"
-            f"- `{os.path.join(OUT, 'data')}/4a_nmf_summary.csv`\n\n"
-            f"Best rank: **{_best_rank}** (AIC: {_best_aic:.1f})"
-        )
+        mo.vstack([
+            mo.md(
+                f"Saved NMF outputs:\n\n"
+                f"- `{_nmf_dir}/L.csv` — L_norm ({best_L_norm_dict['full'].shape})\n"
+                f"- `{_nmf_dir}/A.csv` — A_norm ({best_A_norm_dict['full'].shape})\n"
+                f"- `{_nmf_dir}/L_binarized.csv` ({best_L_binarized_dict['full'].shape})\n"
+                f"- `{_nmf_dir}/A_binarized.csv` ({best_A_binarized_dict['full'].shape})\n"
+                f"- `{os.path.join(OUT, 'data')}/4a_consensus_clusters.csv` ({_consensus_out.shape[0]} genomes)\n"
+                f"- `{os.path.join(OUT, 'data')}/4a_nmf_summary.csv`\n\n"
+                f"Best rank: **{_best_rank}** (AIC: {_best_aic:.1f})"
+            ),
+            mo.ui.table(_summary),
+        ])
     )
 
 
