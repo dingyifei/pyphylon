@@ -25,6 +25,37 @@ with app.setup:
 
 @app.cell
 def _():
+    mo.md(
+        r"""
+        # 3b: Heaps' Law — Pangenome Growth Analysis
+
+        Heaps' law models pangenome growth as genomes are accumulated:
+
+        $$G(n) = \kappa \cdot n^\gamma$$
+
+        where $\kappa$ is a scaling constant and $\gamma$ (gamma/lambda) controls
+        the growth rate. A **gamma < 1** indicates an **open pangenome** — new
+        genes continue to appear as more genomes are added, suggesting the
+        species has access to a large and diverse gene pool.
+
+        This notebook estimates pan, core, accessory, and rare genome size
+        curves by random genome accumulation, then fits Heaps' law to each
+        segment to produce a stacked growth plot.
+        """
+    )
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Setup
+        """
+    )
+
+
+@app.cell
+def _():
     """Parse config and set up directories."""
     config_path = "config.yml"
     if "--config" in sys.argv:
@@ -133,6 +164,20 @@ def _(OUT, df_genes, df_pan_core):
         )
     )
     return output_acc, output_core, output_rare
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Heaps' Law Stacked Plot
+
+        The stacked area plot below shows fitted growth curves for the core,
+        accessory, and rare genome segments on a log-linear scale. The total
+        height at any point represents the predicted pangenome size for that
+        number of genomes.
+        """
+    )
 
 
 @app.cell
