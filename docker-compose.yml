@@ -11,5 +11,27 @@ services:
       APPTAINER_CACHEDIR: /root/.apptainer/cache
     working_dir: /pipeline
 
+  marimo:
+    build:
+      context: .
+      platforms: [linux/amd64]
+    volumes:
+      - .:/pipeline
+    working_dir: /pipeline
+    ports:
+      - "2718:2718"
+    command: ["marimo", "edit", "--host", "0.0.0.0", "--port", "2718", "--no-token", "notebooks/"]
+
+  marimo-app:
+    build:
+      context: .
+      platforms: [linux/amd64]
+    volumes:
+      - .:/pipeline
+    working_dir: /pipeline
+    ports:
+      - "2719:2719"
+    command: ["marimo", "run", "--host", "0.0.0.0", "--port", "2719", "--no-token", "notebooks/"]
+
 volumes:
   apptainer-cache:

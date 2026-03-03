@@ -42,8 +42,7 @@ def _():
     sns.set_palette("deep")
     sns.set_context("paper")
     sns.set_style("whitegrid")
-
-    return CONFIG, DEBUG, FIG, OUTPUT, SPECIES_NAME, TAXON_ID, TEMP
+    return DEBUG, FIG, OUTPUT, SPECIES_NAME, TAXON_ID, TEMP
 
 
 @app.cell
@@ -183,7 +182,13 @@ def _(FIG, filtered_species_summary):
 
 
 @app.cell
-def _(OUTPUT, TEMP, df_filtration, filtered_species_metadata, filtered_species_summary):
+def _(
+    OUTPUT,
+    TEMP,
+    df_filtration,
+    filtered_species_metadata,
+    filtered_species_summary,
+):
     """Save all CSV outputs."""
     filtered_species_summary.to_csv(os.path.join(TEMP, "1a_genome_summary.csv"))
     filtered_species_metadata.to_csv(os.path.join(TEMP, "1a_genome_metadata.csv"))

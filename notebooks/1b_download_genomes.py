@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.20.2"
-app = marimo.App(width="medium")
+app = marimo.App(width="full")
 
 with app.setup:
     import os
@@ -32,8 +32,7 @@ def _():
 
     os.makedirs(TEMP, exist_ok=True)
     os.makedirs(os.path.join(DATA, "raw", "genomes"), exist_ok=True)
-
-    return CONFIG, DATA, DEBUG, TEMP
+    return DATA, TEMP
 
 
 @app.cell
@@ -84,7 +83,7 @@ def _(RAW_GENOMES):
             empty_files.extend(files)
 
     mo.output.replace(mo.md(f"Removed **{len(empty_files)}** empty files."))
-    return (empty_files,)
+    return
 
 
 @app.cell

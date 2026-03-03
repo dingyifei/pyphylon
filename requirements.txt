@@ -30,9 +30,6 @@ beautifulsoup4==4.14.3
 # Config / utilities
 pyyaml==6.0.3
 
-# Jupyter (required by Quarto for rendering {python} code chunks in QMD reports)
-jupyter
-
 # Marimo notebook framework
 marimo>=0.10.0
 

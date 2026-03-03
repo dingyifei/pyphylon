@@ -7,7 +7,6 @@ OUTPUT_DIR: "output"
 DATA_DIR: "data"
 INPUT_DIR: "input"
 FIGURES_DIR: "output/figures"
-REPORTS_DIR: "output/reports"
 SNAKEMAKE_DATA_DIR: "data"
 
 # --- Species ---
@@ -24,7 +23,7 @@ MASH_RANK: 16
 SMALL_CLUSTER_LIMIT: 5
 
 # --- Bioinformatics Workflow ---
-BAKTA_DB_DIR: "temp/db-light"
+BAKTA_DB_DIR: "data/db/bakta-light"
 BAKTA_THREADS: 8
 CDHIT_THREADS: 8
 MLST_THREADS: 4
