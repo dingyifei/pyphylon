@@ -260,7 +260,18 @@ rule nb_5e:
     shell:
         "python notebooks/5e_blast_enrichment.py -- --config {input.config}"
 
-# TODO: Add rules for 5f
+rule nb_5f:
+    input:
+        config="config.yml",
+        l_norm=f"{DATA}/processed/nmf-outputs/L_norm.csv",
+        a_norm=f"{DATA}/processed/nmf-outputs/A_norm.csv",
+        metadata=f"{TEMP}/2d_enriched_metadata.csv",
+        p_new=f"{DATA}/inferring_affinities/combined_P_matrix.csv",
+        mash_dist=f"{DATA}/inferring_affinities/combined_mash_distances.csv",
+    output:
+        f"{OUT}/data/5f_affinity_summary.csv",
+    shell:
+        "python notebooks/5f_infer_affinities.py -- --config {input.config}"
 
 # =============================================================================
 # Bioinformatics: Infer Affinities Workflow
@@ -421,4 +432,10 @@ rule report_5e:
     shell:
         "quarto render reports/5e_blast_enrichment.qmd --to pdf"
 
-# TODO: Add report rules as notebooks are converted
+rule report_5f:
+    input:
+        f"{OUT}/data/5f_affinity_summary.csv",
+    output:
+        f"{REP}/5f_infer_affinities.pdf"
+    shell:
+        "quarto render reports/5f_infer_affinities.qmd --to pdf"

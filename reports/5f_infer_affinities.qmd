@@ -1,0 +1,46 @@
+---
+title: "5f: Affinity Inference"
+format:
+  pdf:
+    toc: true
+execute:
+  echo: false
+---
+
+## Summary
+
+Affinity inference uses Non-Negative Least Squares (NNLS) to estimate phylon
+affinities for new query genomes based on the precomputed NMF basis matrix (L).
+New strains are also classified into MASH clusters via 5-nearest-neighbor
+majority vote.
+
+```{python}
+import pandas as pd
+import os
+
+df = pd.read_csv("../output/data/5f_affinity_summary.csv")
+for _, row in df.iterrows():
+    print(f"{row['metric']}: {row['value']}")
+```
+
+## MASH Cluster Assignments
+
+```{python}
+mc_path = "../output/data/5f_mash_clusters.csv"
+if os.path.exists(mc_path):
+    mc = pd.read_csv(mc_path, index_col=0)
+    mc
+else:
+    print("MASH cluster assignments not available.")
+```
+
+## Affinity Heatmap
+
+```{python}
+#| output: asis
+hm_path = "../output/figures/5f_affinity_heatmap.png"
+if os.path.exists(hm_path):
+    print(f"![Inferred affinities for new strains]({hm_path}){{width=80%}}")
+else:
+    print("Heatmap not available (workflow outputs missing).")
+```
