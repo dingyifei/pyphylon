@@ -83,7 +83,7 @@ Uses `docker-compose.yml` with OrbStack (macOS) or Docker Desktop. The entire re
 # Build image (only needed when requirements.txt changes)
 docker compose build
 
-# Full pipeline (notebooks + bio workflows + reports)
+# Full pipeline (notebooks + bio workflows)
 docker compose run pipeline snakemake --cores 4 --sdm apptainer
 
 # Bio workflow only
@@ -191,8 +191,7 @@ temp/                          # Intermediate files (gitignored)
 └── db-light/                  # BAKTA database
 output/
 ├── figures/                   # PNG plots per step
-├── data/                      # Summary CSVs per step
-└── reports/                   # Quarto PDF reports
+└── data/                      # Summary CSVs per step
 ```
 
 ### Critical Matrix Files
@@ -240,4 +239,4 @@ output/
 
 ## Progress Tracking
 
-The authoritative conversion progress tracker is `adaptation_plan.md` (if present). All 15 notebook conversions (1a through 5f) are complete. The pipeline is orchestrated by the master `Snakefile` with three included bio workflow Snakefiles.
+All 15 notebook conversions (1a through 5f) are complete. The pipeline is orchestrated by the master `Snakefile` with three included bio workflow Snakefiles.
