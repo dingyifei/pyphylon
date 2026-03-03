@@ -157,15 +157,15 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 10: Notebook 5a — Phylon Characterization
-- [ ] **Marimo:** `notebooks/5a_phylon_characterization.py`
-- [ ] **Quarto:** `reports/5a_phylon_characterization.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/5a_phylon_characterization.ipynb`
-- [ ] Add H1 title + overview (L binarized via 3-means, A binarized via threshold)
-- [ ] Add `## Gene Frequency vs Phylon Count` + regression explanation
-- [ ] Add `## Sorted L_binarized` + sorting explanation (zero/single/poly-phylon)
-- [ ] Add `## Sorted A_binarized` + sorting explanation
-- [ ] Wrap circular genome plots with `mo.ui.plotly()` if applicable
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/5a_phylon_characterization.py`
+- [x] **Quarto:** `reports/5a_phylon_characterization.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/5a_phylon_characterization.ipynb`
+- [x] Add H1 title + overview (L binarized via 3-means, A binarized via threshold)
+- [x] Add `## Gene Frequency vs Phylon Count` + regression explanation
+- [x] Add `## Sorted L_binarized` + sorting explanation (zero/single/poly-phylon)
+- [x] Add `## Sorted A_binarized` + sorting explanation
+- [x] Wrap circular genome plots with `mo.ui.plotly()` if applicable — N/A (no circular plots in 5a)
+- [x] Lint + commit
 
 ### Stage 11: Notebook 5b — Gene Differentiation
 - [ ] **Marimo:** `notebooks/5b_gene_diff.py`
@@ -254,3 +254,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | 2026-03-03 | 7 — nb_3a | `Merge report text into nb_3a` | 6 markdown cells added (H1 + overview, Setup, Load Inputs, Gene Frequency Distribution, Pangenome Segment Fitting, Save CAR Classification); `mo.ui.table()` for CAR summary |
 | 2026-03-03 | 8 — nb_3b | `Merge report text into nb_3b` | 3 markdown cells added (H1 + overview with Heaps' formula, Setup, Heaps' Law Stacked Plot) |
 | 2026-03-03 | 9 — nb_4a | `Merge report text into nb_4a` | 7 markdown cells added (H1 + overview, Setup, MCA Cumulative Variance, NMF Decomposition, Consensus Matrix, Consensus Matrix (Filtered), NMF Output Shapes); `mo.ui.table()` for NMF summary |
+| 2026-03-03 | 10 — nb_5a | `Merge report text into nb_5a` | 8 markdown cells added (H1 + overview, Setup, Load Inputs, Binarize L (3-means), Binarize A (threshold), Sorted L + Sorted A, Gene Frequency vs Phylon Count, Save Outputs); no circular plots in 5a |
