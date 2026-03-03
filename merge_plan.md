@@ -126,14 +126,14 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 7: Notebook 3a — Extract CAR
-- [ ] **Marimo:** `notebooks/3a_extract_CAR.py`
-- [ ] **Quarto:** `reports/3a_extract_CAR.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/3a_extract_CAR_genomes.ipynb`
-- [ ] Add H1 title + overview (Core/Accessory/Rare, power-law model)
-- [ ] Add `## Gene Frequency Distribution` before frequency plot
-- [ ] Add `## Pangenome Segment Fitting` before segments plot
-- [ ] Consider `mo.ui.table()` for CAR summary
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/3a_extract_CAR.py`
+- [x] **Quarto:** `reports/3a_extract_CAR.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/3a_extract_CAR_genomes.ipynb`
+- [x] Add H1 title + overview (Core/Accessory/Rare, power-law model)
+- [x] Add `## Gene Frequency Distribution` before frequency plot
+- [x] Add `## Pangenome Segment Fitting` before segments plot
+- [x] Consider `mo.ui.table()` for CAR summary
+- [x] Lint + commit
 
 ### Stage 8: Notebook 3b — Heaps Plot
 - [ ] **Marimo:** `notebooks/3b_heaps_plot.py`
@@ -251,3 +251,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | 2026-03-03 | 4 — nb_2b | `Merge report text into nb_2b` | 8 markdown cells added (H1 + overview, Setup, Raw Mash Distances, Distance Distribution, Sensitivity Analysis, Initial Clustering, Final Clustering, Summary Statistics, Save); `mo.ui.table()` for cluster sizes |
 | 2026-03-03 | 5 — nb_2c | `Merge report text into nb_2c` | 7 markdown cells added (H1 + overview, Setup, Load Metadata, Discover BAKTA Annotations, Build CDS Pangenome, Genes per Genome Distribution, Save Summary) |
 | 2026-03-03 | 6 — nb_2d | `Merge report text into nb_2d` | 5 markdown cells added (H1 + overview, Setup, Load Inputs, MLST Sequence Type Distribution, Save); `mo.ui.table()` for top-20 ST counts |
+| 2026-03-03 | 7 — nb_3a | `Merge report text into nb_3a` | 6 markdown cells added (H1 + overview, Setup, Load Inputs, Gene Frequency Distribution, Pangenome Segment Fitting, Save CAR Classification); `mo.ui.table()` for CAR summary |

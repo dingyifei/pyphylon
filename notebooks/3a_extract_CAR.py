@@ -24,6 +24,31 @@ with app.setup:
 
 @app.cell
 def _():
+    mo.md(
+        """
+        # 3a: Core/Accessory/Rare Gene Classification
+
+        The pangenome is partitioned into three frequency-based categories by
+        fitting a **power-law model** to the gene frequency distribution:
+
+        - **Core** genes — present in nearly all genomes (above the upper inflection point)
+        - **Accessory** genes — present at intermediate frequency (between inflection points)
+        - **Rare** genes — present in only a few genomes (below the lower inflection point)
+
+        The inflection points are identified automatically by
+        `find_pangenome_segments()`, which fits a piecewise curve to the sorted
+        gene-frequency histogram and minimises residual error.
+        """
+    )
+
+
+@app.cell
+def _():
+    mo.md("## Setup")
+
+
+@app.cell
+def _():
     """Parse config and set up directories."""
     config_path = "config.yml"
     if "--config" in sys.argv:
@@ -43,6 +68,11 @@ def _():
     os.makedirs(os.path.join(DATA, "processed", "CAR_genomes"), exist_ok=True)
 
     return CONFIG, DATA, FIG, OUT, SPECIES, TEMP
+
+
+@app.cell
+def _():
+    mo.md("## Load Inputs")
 
 
 @app.cell
@@ -68,6 +98,20 @@ def _(DATA, SPECIES, TEMP):
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## Gene Frequency Distribution
+
+        A histogram of per-gene frequency (number of genomes each gene appears in)
+        reveals the characteristic U-shaped distribution of bacterial pangenomes:
+        many genes are either very common (core) or very rare, with a smaller
+        accessory fraction in between.
+        """
+    )
+
+
+@app.cell
 def _(FIG, df_genes):
     """Plot gene frequency distribution across all genomes."""
     df_gene_freq = df_genes.sum(axis=1)
@@ -82,6 +126,19 @@ def _(FIG, df_genes):
 
     fig_freq.savefig(os.path.join(FIG, "3a_gene_frequency.png"), bbox_inches="tight")
     mo.output.replace(fig_freq)
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Pangenome Segment Fitting
+
+        A piecewise power-law curve is fitted to the sorted gene-frequency
+        distribution. The two inflection points define the **core** and **rare**
+        thresholds; everything in between is classified as **accessory**.
+        """
+    )
 
 
 @app.cell
@@ -104,6 +161,11 @@ def _(FIG, df_genes):
 
 
 @app.cell
+def _():
+    mo.md("## Save CAR Classification")
+
+
+@app.cell
 def _(DATA, OUT, df_genes, segments):
     """Classify genes into Core/Accessory/Rare and save results."""
     df_freq = df_genes.sum(axis=1)
@@ -119,15 +181,15 @@ def _(DATA, OUT, df_genes, segments):
     df_acc.to_csv(os.path.join(car_dir, "df_acc.csv"))
     df_rare.to_csv(os.path.join(car_dir, "df_rare.csv"))
 
-    # Save summary for Quarto report
+    # Save summary CSV
     _summary = pd.DataFrame(
         {
-            "category": ["Core", "Accessory", "Rare", "Total"],
-            "n_genes": [df_core.shape[0], df_acc.shape[0], df_rare.shape[0], df_genes.shape[0]],
-            "n_genomes": [df_core.shape[1], df_acc.shape[1], df_rare.shape[1], df_genes.shape[1]],
-            "threshold": [
+            "Category": ["Core", "Accessory", "Rare", "Total"],
+            "Genes": [df_core.shape[0], df_acc.shape[0], df_rare.shape[0], df_genes.shape[0]],
+            "Genomes": [df_core.shape[1], df_acc.shape[1], df_rare.shape[1], df_genes.shape[1]],
+            "Threshold": [
                 f"> {np.floor(segments[0]):.0f}",
-                f"{np.ceil(segments[1]):.0f} - {np.floor(segments[0]):.0f}",
+                f"{np.ceil(segments[1]):.0f} – {np.floor(segments[0]):.0f}",
                 f"< {np.ceil(segments[1]):.0f}",
                 "all",
             ],
@@ -136,15 +198,10 @@ def _(DATA, OUT, df_genes, segments):
     _summary.to_csv(os.path.join(OUT, "data", "3a_car_summary.csv"), index=False)
 
     mo.output.replace(
-        mo.md(
-            f"CAR classification saved:\n\n"
-            f"| Category | Genes | Threshold |\n"
-            f"|----------|-------|-----------|\n"
-            f"| Core | {df_core.shape[0]} | > {np.floor(segments[0]):.0f} |\n"
-            f"| Accessory | {df_acc.shape[0]} | {np.ceil(segments[1]):.0f} - {np.floor(segments[0]):.0f} |\n"
-            f"| Rare | {df_rare.shape[0]} | < {np.ceil(segments[1]):.0f} |\n"
-            f"| **Total** | **{df_genes.shape[0]}** | |"
-        )
+        mo.vstack([
+            mo.md("**CAR classification saved.**"),
+            mo.ui.table(_summary, selection=None),
+        ])
     )
 
 
