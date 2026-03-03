@@ -18,6 +18,24 @@ with app.setup:
 
 @app.cell
 def _():
+    mo.md(
+        """
+        # 1a: Filter Genomes for Download
+
+        Select candidate genomes from [BV-BRC](https://www.bv-brc.org/) and
+        quality-filter using N50, contig count, and CheckM completeness /
+        contamination metrics.
+        """
+    )
+
+
+@app.cell
+def _():
+    mo.md("## Setup")
+
+
+@app.cell
+def _():
     """Parse config and set up directories."""
     config_path = "config.yml"
     if "--config" in sys.argv:
@@ -62,6 +80,19 @@ def _(SPECIES_NAME, TAXON_ID):
         )
     )
     return genome_df, scaffold_n50, species_summary
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Plot Unfiltered Dataset
+
+        Visualize the unfiltered genome distributions: genome length vs predicted
+        gene count, N50 histogram (with 85% reference threshold), and CheckM
+        completeness / contamination profiles.
+        """
+    )
 
 
 @app.cell
@@ -115,6 +146,19 @@ def _(FIG, scaffold_n50, species_summary):
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## Quality Filtering
+
+        Complete genomes are filtered by scaffold N50 (≥ 85% of the reference).
+        WGS genomes are additionally filtered by CheckM contamination (< 5%)
+        and completeness (≥ 92%).
+        """
+    )
+
+
+@app.cell
 def _(DEBUG, genome_df, min_thresh_n50, species_summary):
     """Apply genome quality filters. DEBUG truncation is in this cell to avoid redefinition."""
     filtered_species_summary, df_filtration = qcqa.filter_by_genome_quality(
@@ -145,6 +189,19 @@ def _(DEBUG, genome_df, min_thresh_n50, species_summary):
         )
     )
     return df_filtration, filtered_species_metadata, filtered_species_summary
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Filtered Distributions
+
+        Verify the filtered dataset: genome length vs gene count should form
+        a tight cluster, and GC content vs contig count should show no major
+        outliers.
+        """
+    )
 
 
 @app.cell
@@ -179,6 +236,11 @@ def _(FIG, filtered_species_summary):
 
     mo.output.replace(mo.vstack([h_filtered.figure, h_gc.figure]))
     return
+
+
+@app.cell
+def _():
+    mo.md("## Save Filtered Genomes")
 
 
 @app.cell

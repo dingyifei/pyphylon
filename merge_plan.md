@@ -65,18 +65,18 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 ## Checklist
 
 ### Stage 1: Notebook 1a — Filter Genomes
-- [ ] **Marimo:** `notebooks/1a_filter_genomes.py`
-- [ ] **Quarto:** `reports/1a_genome_filtering.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/1a_filter_genomes_for_download.ipynb`
-- [ ] Add H1 title + overview cell (before config cell)
-- [ ] Add `## Setup` header cell (before config cell)
-- [ ] Add `## Plot Unfiltered Dataset` header cell (before unfiltered plot cell)
-- [ ] Add `## Quality Filtering` header cell (before filter cell)
-- [ ] Add `## Filtered Distributions` header cell (before filtered plot cell)
-- [ ] Add `## Save Filtered Genomes` header cell (before save cell)
-- [ ] Ensure `mo.ui.table(df_filtration)` is kept (already there)
-- [ ] Lint: `ruff check notebooks/1a_filter_genomes.py`
-- [ ] Commit
+- [x] **Marimo:** `notebooks/1a_filter_genomes.py`
+- [x] **Quarto:** `reports/1a_genome_filtering.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/1a_filter_genomes_for_download.ipynb`
+- [x] Add H1 title + overview cell (before config cell)
+- [x] Add `## Setup` header cell (before config cell)
+- [x] Add `## Plot Unfiltered Dataset` header cell (before unfiltered plot cell)
+- [x] Add `## Quality Filtering` header cell (before filter cell)
+- [x] Add `## Filtered Distributions` header cell (before filtered plot cell)
+- [x] Add `## Save Filtered Genomes` header cell (before save cell)
+- [x] Ensure `mo.ui.table(df_filtration)` is kept (already there)
+- [x] Lint: `ruff check notebooks/1a_filter_genomes.py`
+- [x] Commit
 
 ### Stage 2: Notebook 1b — Download Genomes
 - [ ] **Marimo:** `notebooks/1b_download_genomes.py`
@@ -245,4 +245,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 
 | Date | Stage | Commit | Notes |
 |------|-------|--------|-------|
-| | | | |
+| 2026-03-03 | 1 — nb_1a | `Merge report text into nb_1a` | 6 markdown cells added (H1, Setup, Plot Unfiltered, Quality Filtering, Filtered Distributions, Save) |
