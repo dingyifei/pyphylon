@@ -23,6 +23,26 @@ with app.setup:
 
 @app.cell
 def _():
+    mo.md(
+        """
+        # 2c: Build CDS Pangenome
+
+        Protein sequences from **BAKTA**-annotated genomes are clustered using
+        **CD-HIT** (80% identity, 80% alignment length) to define gene families
+        and allele variants. The output is a pair of binary presence/absence
+        matrices — one at the gene level, one at the allele level — that form
+        the foundation for all downstream pangenome analyses.
+        """
+    )
+
+
+@app.cell
+def _():
+    mo.md("## Setup")
+
+
+@app.cell
+def _():
     """Parse config and set up directories."""
     config_path = "config.yml"
     if "--config" in sys.argv:
@@ -44,6 +64,11 @@ def _():
 
 
 @app.cell
+def _():
+    mo.md("## Load Mash-Filtered Metadata")
+
+
+@app.cell
 def _(TEMP):
     """Load mash-filtered genome metadata from 2b."""
     metadata_2b = pd.read_csv(
@@ -57,6 +82,19 @@ def _(TEMP):
         )
     )
     return (metadata_2b,)
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Discover BAKTA Annotations
+
+        BAKTA annotates bacterial genomes and produces `.faa` protein FASTA files.
+        We enumerate all annotated genomes, then filter to those that survived
+        the Mash distance filtration in step 2b.
+        """
+    )
 
 
 @app.cell
@@ -87,6 +125,20 @@ def _(DATA, metadata_2b):
         )
     )
     return (filtered_faa_paths,)
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Build CDS Pangenome
+
+        CD-HIT clusters protein sequences at 80% identity and 80% alignment
+        length. Each cluster defines a **gene family**; individual sequences
+        within a cluster are **alleles**. The result is two binary
+        presence/absence matrices (strains x genes, strains x alleles).
+        """
+    )
 
 
 @app.cell
@@ -143,6 +195,11 @@ def _(CONFIG, DATA, SPECIES, filtered_faa_paths):
 
 
 @app.cell
+def _():
+    mo.md("## Genes per Genome Distribution")
+
+
+@app.cell
 def _(FIG, df_genes):
     """Plot genes-per-genome distribution."""
     if df_genes.empty:
@@ -161,6 +218,11 @@ def _(FIG, df_genes):
 
         fig.savefig(os.path.join(FIG, "2c_genes_per_genome.png"), bbox_inches="tight")
         mo.output.replace(fig)
+
+
+@app.cell
+def _():
+    mo.md("## Save Pangenome Summary")
 
 
 @app.cell

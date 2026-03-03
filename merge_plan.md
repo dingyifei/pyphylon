@@ -109,12 +109,12 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 5: Notebook 2c — Build Pangenome
-- [ ] **Marimo:** `notebooks/2c_build_pangenome.py`
-- [ ] **Quarto:** `reports/2c_build_pangenome.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/2c_build_cds_pangenome.ipynb`
-- [ ] Add H1 title + overview (CD-HIT clustering → gene/allele matrices)
-- [ ] Add `## Genes per Genome Distribution` before plot cell
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/2c_build_pangenome.py`
+- [x] **Quarto:** `reports/2c_build_pangenome.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/2c_build_cds_pangenome.ipynb`
+- [x] Add H1 title + overview (CD-HIT clustering → gene/allele matrices)
+- [x] Add `## Genes per Genome Distribution` before plot cell
+- [x] Lint + commit
 
 ### Stage 6: Notebook 2d — Enrich Metadata
 - [ ] **Marimo:** `notebooks/2d_enrich_metadata.py`
@@ -249,3 +249,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | 2026-03-03 | 2 — nb_1b | `Merge report text into nb_1b` | 5 markdown cells added (H1, Setup, Download, Update Genome Files, Save); removed unused DEBUG variable |
 | 2026-03-03 | 3 — nb_2a | `Merge report text into nb_2a` | 4 markdown cells added (H1 + overview, Setup, De-duplicate Entries, Save Files) |
 | 2026-03-03 | 4 — nb_2b | `Merge report text into nb_2b` | 8 markdown cells added (H1 + overview, Setup, Raw Mash Distances, Distance Distribution, Sensitivity Analysis, Initial Clustering, Final Clustering, Summary Statistics, Save); `mo.ui.table()` for cluster sizes |
+| 2026-03-03 | 5 — nb_2c | `Merge report text into nb_2c` | 7 markdown cells added (H1 + overview, Setup, Load Metadata, Discover BAKTA Annotations, Build CDS Pangenome, Genes per Genome Distribution, Save Summary) |
