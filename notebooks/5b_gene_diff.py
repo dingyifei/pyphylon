@@ -24,6 +24,26 @@ with app.setup:
 
 @app.cell
 def _():
+    mo.md(
+        """
+        # 5b: Gene Differentiation
+
+        Hierarchical clustering (**Ward's method**) of the binarized L matrix
+        reveals relationships between phylons based on shared gene content.
+        The companion dendrogram annotates each split with **exclusive gene
+        counts** and **total split gene counts**, quantifying how gene
+        repertoires diverge across phylon lineages.
+        """
+    )
+
+
+@app.cell
+def _():
+    mo.md("## Setup")
+
+
+@app.cell
+def _():
     """Parse config and set up directories."""
     config_path = "config.yml"
     if "--config" in sys.argv:
@@ -43,6 +63,18 @@ def _():
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## Load L_binarized
+
+        The binarized L matrix (genes × phylons) assigns each gene to zero or
+        more phylons. Values are 0 or 1 from the 3-means thresholding in step 5a.
+        """
+    )
+
+
+@app.cell
 def _(DATA):
     """Load L_binarized matrix from 5a outputs."""
     L_binarized = pd.read_csv(os.path.join(DATA, "processed", "nmf-outputs", "L_binarized.csv"), index_col=0)
@@ -58,14 +90,42 @@ def _(DATA):
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## Ward Clustering Heatmap
+
+        Clustermap of L_binarized (genes × phylons) using Ward's minimum-variance
+        linkage. Rows and columns are reordered by the dendrogram so that phylons
+        with similar gene-membership profiles cluster together.
+        """
+    )
+
+
+@app.cell
 def _(FIG, L_binarized):
-    """Generate Ward clustermap and annotated phylon dendrogram."""
-    # Ward hierarchical clustering heatmap
+    """Ward hierarchical clustering heatmap."""
     g = sns.clustermap(L_binarized, method="ward", cmap="hot_r")
     g.savefig(os.path.join(FIG, "5b_clustermap.png"), bbox_inches="tight")
-    plt.close(g.fig)
+    mo.output.replace(g.fig)
 
-    # Annotated dendrogram with gene counts per split
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Phylon Dendrogram
+
+        Annotated dendrogram showing gene differentiation at each split node.
+        Labels indicate **exclusive genes** (genes unique to one branch) and
+        **total split genes** (all genes distinguishing the two branches).
+        """
+    )
+
+
+@app.cell
+def _(FIG, L_binarized):
+    """Annotated phylon dendrogram with gene counts per split."""
     fig_dend, ax_dend = plt.subplots(figsize=(10, 6))
     ax_dend, df_stats, split_gene_sets_labeled = generate_phylon_dendrogram(
         L_binarized,
@@ -79,6 +139,11 @@ def _(FIG, L_binarized):
 
     mo.output.replace(mo.vstack([mo.md("**Phylon dendrogram** (annotated with gene counts)"), fig_dend]))
     return df_stats, split_gene_sets_labeled
+
+
+@app.cell
+def _():
+    mo.md("## Save Results")
 
 
 @app.cell
