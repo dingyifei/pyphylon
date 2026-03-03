@@ -95,18 +95,18 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 4: Notebook 2b — Mash Filtration
-- [ ] **Marimo:** `notebooks/2b_mash_filtration.py`
-- [ ] **Quarto:** `reports/2b_mash_filtration.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/2b_mash_filtration_and_clustering.ipynb`
-- [ ] Add H1 title + overview (ANI-based filtering, hierarchical clustering)
-- [ ] Add `## Raw Mash Distances` before heatmap cell
-- [ ] Add `## Distance Distribution` before histogram cells
-- [ ] Add `## Sensitivity Analysis` before sensitivity cell
-- [ ] Add `## Initial Clustering` before initial clustermap cell
-- [ ] Add `## Final Clustering` before final clustermap cell
-- [ ] Add `## Summary Statistics` before summary cell
-- [ ] Consider `mo.ui.table()` for cluster size summary
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/2b_mash_filtration.py`
+- [x] **Quarto:** `reports/2b_mash_filtration.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/2b_mash_filtration_and_clustering.ipynb`
+- [x] Add H1 title + overview (ANI-based filtering, hierarchical clustering)
+- [x] Add `## Raw Mash Distances` before heatmap cell
+- [x] Add `## Distance Distribution` before histogram cells
+- [x] Add `## Sensitivity Analysis` before sensitivity cell
+- [x] Add `## Initial Clustering` before initial clustermap cell
+- [x] Add `## Final Clustering` before final clustermap cell
+- [x] Add `## Summary Statistics` before summary cell
+- [x] Consider `mo.ui.table()` for cluster size summary
+- [x] Lint + commit
 
 ### Stage 5: Notebook 2c — Build Pangenome
 - [ ] **Marimo:** `notebooks/2c_build_pangenome.py`
@@ -248,3 +248,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | 2026-03-03 | 1 — nb_1a | `Merge report text into nb_1a` | 6 markdown cells added (H1, Setup, Plot Unfiltered, Quality Filtering, Filtered Distributions, Save) |
 | 2026-03-03 | 2 — nb_1b | `Merge report text into nb_1b` | 5 markdown cells added (H1, Setup, Download, Update Genome Files, Save); removed unused DEBUG variable |
 | 2026-03-03 | 3 — nb_2a | `Merge report text into nb_2a` | 4 markdown cells added (H1 + overview, Setup, De-duplicate Entries, Save Files) |
+| 2026-03-03 | 4 — nb_2b | `Merge report text into nb_2b` | 8 markdown cells added (H1 + overview, Setup, Raw Mash Distances, Distance Distribution, Sensitivity Analysis, Initial Clustering, Final Clustering, Summary Statistics, Save); `mo.ui.table()` for cluster sizes |

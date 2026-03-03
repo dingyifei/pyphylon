@@ -20,6 +20,30 @@ with app.setup:
 
 @app.cell
 def _():
+    mo.md(
+        """
+        # 2b: Mash Filtration & Clustering
+
+        Pairwise genome similarity is computed using **Mash**, which approximates
+        Average Nucleotide Identity (ANI). Genomes with a Mash distance ≥ 0.05
+        to the reference strains are removed (the 0.05 threshold corresponds to
+        the soft limit for bacterial species delineation).
+
+        The surviving genomes are then hierarchically clustered on their
+        Pearson-correlation distance matrix. An elbow-based sensitivity analysis
+        selects the clustering threshold, and small clusters (< 5 members) are
+        iteratively pruned until every cluster is robust.
+        """
+    )
+
+
+@app.cell
+def _():
+    mo.md("## Setup")
+
+
+@app.cell
+def _():
     """Parse config and set up directories."""
     config_path = "config.yml"
     if "--config" in sys.argv:
@@ -80,6 +104,11 @@ def _(TEMP):
 
 
 @app.cell
+def _():
+    mo.md("## Raw Mash Distances")
+
+
+@app.cell
 def _(FIG, mash_square_raw):
     """Plot raw mash distance heatmap."""
     fig_heatmap, ax_heatmap = plt.subplots(figsize=(8, 6))
@@ -88,6 +117,23 @@ def _(FIG, mash_square_raw):
     fig_heatmap.savefig(os.path.join(FIG, "2b_mash_heatmap.png"), bbox_inches="tight", dpi=200)
     mo.output.replace(fig_heatmap)
     return
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Distance Distribution
+
+        The Pearson-correlation distance matrix is computed from the raw Mash
+        distance matrix (expensive — cached via `mo.persistent_cache`). Genomes
+        are then filtered in two steps:
+
+        1. Restrict to the scrubbed strains from notebook 2a.
+        2. Remove genomes with Mash distance ≥ 0.05 to reference/representative
+           strains (the species-delineation threshold).
+        """
+    )
 
 
 @app.cell
@@ -155,6 +201,19 @@ def _(FIG, input_metadata, mash_square_raw):
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## Sensitivity Analysis
+
+        The optimal clustering threshold is determined by an elbow analysis on
+        the number-of-clusters vs. threshold curve (complete genomes only).
+        A +0.1 offset is added to the elbow value to avoid over-splitting.
+        """
+    )
+
+
+@app.cell
 def _(FIG, input_summary, mash_corr_dist_filtered, mash_square_filtered):
     """Extract complete genomes and run sensitivity analysis for clustering threshold."""
     # Subset to complete genomes
@@ -196,6 +255,19 @@ def _(FIG, input_summary, mash_corr_dist_filtered, mash_square_filtered):
         )
     )
     return elbow_threshold, mash_corr_dist_complete, mash_square_complete
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Initial Clustering
+
+        Hierarchical clustering with the elbow-derived threshold. Small clusters
+        (fewer than the configured `SMALL_CLUSTER_LIMIT` members) are iteratively
+        removed until all remaining clusters are robust.
+        """
+    )
 
 
 @app.cell
@@ -315,6 +387,11 @@ def _(SMALL_CLUSTER_LIMIT, elbow_threshold, mash_corr_dist_complete, mash_square
 
 
 @app.cell
+def _():
+    mo.md("## Final Clustering")
+
+
+@app.cell
 def _(FIG, final_clst, final_link, mash_square_final):
     """Final clustermap and cluster size visualization."""
     # Color clusters
@@ -360,6 +437,11 @@ def _(FIG, final_clst, final_link, mash_square_final):
 
 
 @app.cell
+def _():
+    mo.md("## Summary Statistics")
+
+
+@app.cell
 def _(final_clst, input_metadata, input_summary):
     """Filter metadata/summary to surviving genomes and add mash_cluster column."""
     survived = final_clst.index
@@ -370,15 +452,32 @@ def _(final_clst, input_metadata, input_summary):
     cluster_map = final_clst["cluster"].to_dict()
     final_metadata["mash_cluster"] = final_metadata["genome_id"].astype(str).map(cluster_map)
 
+    # Cluster size table
+    cluster_sizes = (
+        final_metadata["mash_cluster"]
+        .value_counts()
+        .sort_index()
+        .rename_axis("cluster")
+        .reset_index(name="genomes")
+    )
+
     mo.output.replace(
-        mo.md(
-            f"Final dataset:\n\n"
-            f"- **Genomes:** {final_metadata.shape[0]}\n"
-            f"- **Clusters:** {final_metadata['mash_cluster'].nunique()}\n"
-            f"- **Summary rows:** {final_summary.shape[0]}"
+        mo.vstack(
+            [
+                mo.md(
+                    f"Final dataset: **{final_metadata.shape[0]}** genomes "
+                    f"in **{final_metadata['mash_cluster'].nunique()}** clusters"
+                ),
+                mo.ui.table(cluster_sizes),
+            ]
         )
     )
     return final_metadata, final_summary
+
+
+@app.cell
+def _():
+    mo.md("## Save Filtered Genomes")
 
 
 @app.cell
