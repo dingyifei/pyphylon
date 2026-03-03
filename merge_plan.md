@@ -217,21 +217,21 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 16: Snakefile Cleanup
-- [ ] Remove all 15 `report_*` rules (lines 272–462)
-- [ ] Remove `REP = config["REPORTS_DIR"]` (line 14)
-- [ ] Update `rule all:` — replace report PDF targets with notebook data outputs
-- [ ] Update header comment (remove Quarto references)
-- [ ] Dry-run: `snakemake -n --cores 1`
-- [ ] Commit: `Remove Quarto report rules from Snakefile`
+- [x] Remove all 15 `report_*` rules (lines 272–462) — already done in initial migration
+- [x] Remove `REP = config["REPORTS_DIR"]` (line 14) — already done in initial migration
+- [x] Update `rule all:` — replace report PDF targets with notebook data outputs — already done
+- [x] Update header comment (remove Quarto references) — already clean
+- [x] Dry-run: `snakemake -n --cores 1` — verified, 945 jobs planned
+- [x] Commit: (no-op — Snakefile was already clean from initial migration)
 
 ### Stage 17: Delete Quarto Files
-- [ ] Delete `reports/*.qmd` (15 files)
-- [ ] Delete `reports/*.quarto_ipynb` (3 files)
-- [ ] Delete `reports/_quarto.yml`, `reports/.gitignore`
-- [ ] Delete `_quarto.yml` (root)
-- [ ] Remove `reports/` directory
-- [ ] Remove `REPORTS_DIR` from `config.yml` (line 10)
-- [ ] Commit: `Remove Quarto report files and config`
+- [x] Delete `reports/*.qmd` (15 files)
+- [x] Delete `reports/*.quarto_ipynb` (3 files) — none existed
+- [x] Delete `reports/_quarto.yml`, `reports/.gitignore` — _quarto.yml deleted; no .gitignore existed
+- [x] Delete `_quarto.yml` (root) — did not exist
+- [x] Remove `reports/` directory
+- [x] Remove `REPORTS_DIR` from `config.yml` (line 10) — already absent
+- [x] Commit: `Remove Quarto report files and config`
 
 ### Stage 18: Documentation Update
 - [ ] Update `CLAUDE.md` — remove Quarto references, `REPORTS_DIR`, `report_*` examples
@@ -260,3 +260,5 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | 2026-03-03 | 13 — nb_5d | `Merge report text into nb_5d` | 10 markdown cells added (H1 + overview, Setup, Load Inputs, Parse GFF Files, Gene Order Standardization, Genetic Variation, Gene Length Distribution, Circular Genome Plots, Unique Genes by Phylon, Save Results); `mo.ui.tabs()` + `mo.ui.plotly()` for per-phylon circular genome plots; `mo.ui.table()` for unique gene counts |
 | 2026-03-03 | 14 — nb_5e | `Merge report text into nb_5e` | 7 markdown cells added (H1 + overview, Setup, Extract Representative Sequences, VFDB Enrichment Results, Custom Queries with blastp example, Save Results); `mo.ui.table()` for VFDB hits |
 | 2026-03-03 | 15 — nb_5f | `Merge report text into nb_5f` | 8 markdown cells added (H1 + overview, Setup, Load Inputs, Load Workflow Outputs, MASH Cluster Assignments, Infer Phylon Affinities, Affinity Heatmap, Save Results); split monolithic classify+infer cell into separate MASH classify and NNLS infer cells; `mo.ui.table()` for MASH cluster assignments |
+| 2026-03-03 | 16 — Snakefile | (no-op) | Snakefile already clean from initial migration; dry-run verified |
+| 2026-03-03 | 17 — Quarto files | `Remove Quarto report files and config` | Deleted 15 .qmd files, `_quarto.yml`, `.gitkeep`; removed `reports/` directory; no `.quarto_ipynb`, root `_quarto.yml`, or `REPORTS_DIR` config to remove |
