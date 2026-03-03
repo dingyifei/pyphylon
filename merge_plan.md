@@ -177,14 +177,14 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 12: Notebook 5c — Functional Enrichments
-- [ ] **Marimo:** `notebooks/5c_functional_enrichments.py`
-- [ ] **Quarto:** `reports/5c_functional_enrichments.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/5c_functional_enrichments.ipynb`
-- [ ] Add H1 title + overview (GO enrichment, hypergeometric test, p < 0.05)
-- [ ] Add `## Top Enrichments` — use `mo.ui.table()` for enrichment results
-- [ ] Add `## Enrichment Heatmap` + explanation (p-values, darker = stronger)
-- [ ] Add `## Phylon Wordclouds` — organize with `mo.ui.tabs()` per phylon
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/5c_functional_enrichments.py`
+- [x] **Quarto:** `reports/5c_functional_enrichments.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/5c_functional_enrichments.ipynb`
+- [x] Add H1 title + overview (GO enrichment, hypergeometric test, p < 0.05)
+- [x] Add `## Top Enrichments` — use `mo.ui.table()` for enrichment results
+- [x] Add `## Enrichment Heatmap` + explanation (p-values, darker = stronger)
+- [x] Add `## Phylon Wordclouds` — organize with `mo.ui.tabs()` per phylon
+- [x] Lint + commit
 
 ### Stage 13: Notebook 5d — Gene Alignment
 - [ ] **Marimo:** `notebooks/5d_gene_alignment.py`
@@ -256,3 +256,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | 2026-03-03 | 9 — nb_4a | `Merge report text into nb_4a` | 7 markdown cells added (H1 + overview, Setup, MCA Cumulative Variance, NMF Decomposition, Consensus Matrix, Consensus Matrix (Filtered), NMF Output Shapes); `mo.ui.table()` for NMF summary |
 | 2026-03-03 | 10 — nb_5a | `Merge report text into nb_5a` | 8 markdown cells added (H1 + overview, Setup, Load Inputs, Binarize L (3-means), Binarize A (threshold), Sorted L + Sorted A, Gene Frequency vs Phylon Count, Save Outputs); no circular plots in 5a |
 | 2026-03-03 | 11 — nb_5b | `Merge report text into nb_5b` | 7 markdown cells added (H1 + overview, Setup, Load L_binarized, Ward Clustering Heatmap, Phylon Dendrogram, Save Results); split combined plot cell into separate clustermap + dendrogram cells |
+| 2026-03-03 | 12 — nb_5c | `Merge report text into nb_5c` | 9 markdown cells added (H1 + overview, Setup, Load Inputs, Build GO Mapping, Compute Enrichments, Top Enrichments, Enrichment Heatmap, Phylon Wordclouds, Summary); `mo.ui.table()` for enrichment results; `mo.ui.tabs()` for per-phylon wordclouds; removed unused `FIG` param from enrichment cell |

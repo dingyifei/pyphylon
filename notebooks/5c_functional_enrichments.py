@@ -31,6 +31,29 @@ with app.setup:
 
 @app.cell
 def _():
+    mo.md(
+        """
+        # 5c: Functional Enrichments
+
+        GO term enrichment analysis identifies biological functions that are
+        significantly over-represented in each phylon's gene set. For every
+        phylon-GO term pair a **hypergeometric test** compares the observed
+        overlap to the expected overlap under random sampling; results are
+        filtered at **p < 0.05**.
+
+        The generic category *SO:0001217* ("protein-coding gene") is excluded
+        because it carries no discriminating information.
+        """
+    )
+
+
+@app.cell
+def _():
+    mo.md("## Setup")
+
+
+@app.cell
+def _():
     """Parse config and set up directories."""
     config_path = "config.yml"
     if "--config" in sys.argv:
@@ -48,6 +71,11 @@ def _():
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
 
     return CONFIG, DATA, FIG, OUT, SPECIES
+
+
+@app.cell
+def _():
+    mo.md("## Load Inputs")
 
 
 @app.cell
@@ -76,6 +104,19 @@ def _(DATA):
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## Build GO Mapping
+
+        Each CD-HIT gene cluster is linked to its BAKTA-annotated product
+        description and GO terms via the pangenome-to-locus map. GO terms
+        assigned to fewer than 4 clusters are dropped to reduce noise.
+        """
+    )
+
+
+@app.cell
 def _(DATA, SPECIES, all_functions):
     """Build cluster → function mapping and filter GO terms."""
     pg2locus_map = get_pg_to_locus_map(DATA, SPECIES)
@@ -100,7 +141,12 @@ def _(DATA, SPECIES, all_functions):
 
 
 @app.cell
-def _(FIG, L_BIN, OUT, cluster_to_go_functions, functions2genes, go_functions):
+def _():
+    mo.md("## Compute Enrichments")
+
+
+@app.cell
+def _(L_BIN, OUT, cluster_to_go_functions, functions2genes, go_functions):
     """Compute GO enrichments per phylon (cached), filter, merge GO names, save."""
     with mo.persistent_cache("5c_enrichments"):
         phylon_go_enrichments_raw = calc_all_phylon_go_enrichments(
@@ -137,6 +183,35 @@ def _(FIG, L_BIN, OUT, cluster_to_go_functions, functions2genes, go_functions):
 
 
 @app.cell
+def _():
+    mo.md("## Top Enrichments")
+
+
+@app.cell
+def _(phylon_go_enrichments):
+    """Interactive table of significant GO enrichments."""
+    display_cols = ["phylon", "function", "name", "p_value", "overlap", "genes in phylon", "genes w function"]
+    available_cols = [c for c in display_cols if c in phylon_go_enrichments.columns]
+    mo.ui.table(
+        phylon_go_enrichments[available_cols].sort_values("p_value"),
+        label="Significant GO enrichments (p < 0.05)",
+    )
+
+
+@app.cell
+def _():
+    mo.md(
+        """
+        ## Enrichment Heatmap
+
+        Clustered heatmap of enrichment p-values (phylons x GO terms).
+        Darker colours indicate stronger enrichment (lower p-values);
+        missing values are filled with 0.05 (the significance threshold).
+        """
+    )
+
+
+@app.cell
 def _(FIG, phylon_go_enrichments):
     """Generate enrichment heatmap (phylon × GO term, colored by p-value)."""
     phylon_go_enrichments_mat = pd.pivot_table(
@@ -150,14 +225,29 @@ def _(FIG, phylon_go_enrichments):
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## Phylon Wordclouds
+
+        Word clouds of gene product descriptions for each phylon, weighted
+        by phylon contribution. Common uninformative terms (hypothetical,
+        uncharacterised, etc.) are filtered out by `gen_phylon_wordcloud`.
+        """
+    )
+
+
+@app.cell
 def _(FIG, L_BIN, functions2genes, phylon_go_enrichments):
-    """Generate and save wordclouds for each phylon."""
+    """Generate wordclouds per phylon and display in tabs."""
     wordcloud_phylons = sorted(phylon_go_enrichments["phylon"].unique())
+    wc_tabs = {}
     for _phylon in wordcloud_phylons:
         wc_path = os.path.join(FIG, f"5c_wordcloud_{_phylon}.png")
         gen_phylon_wordcloud(L_BIN, functions2genes, _phylon, cutoff=0, save=True, filename=wc_path)
+        wc_tabs[_phylon] = mo.image(src=wc_path)
 
-    mo.output.replace(mo.md(f"Saved **{len(wordcloud_phylons)}** wordcloud PNGs to `output/figures/`"))
+    mo.ui.tabs(wc_tabs)
 
 
 @app.cell
