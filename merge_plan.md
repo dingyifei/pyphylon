@@ -79,12 +79,12 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Commit
 
 ### Stage 2: Notebook 1b — Download Genomes
-- [ ] **Marimo:** `notebooks/1b_download_genomes.py`
-- [ ] **Quarto:** `reports/1b_genome_download.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/1b_download_genomes_bvbrc.ipynb`
-- [ ] Add H1 title + overview cell
-- [ ] Add section headers matching ref notebook flow
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/1b_download_genomes.py`
+- [x] **Quarto:** `reports/1b_genome_download.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/1b_download_genomes_bvbrc.ipynb`
+- [x] Add H1 title + overview cell
+- [x] Add section headers matching ref notebook flow
+- [x] Lint + commit
 
 ### Stage 3: Notebook 2a — Clean Metadata
 - [ ] **Marimo:** `notebooks/2a_clean_metadata.py`
@@ -246,3 +246,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | Date | Stage | Commit | Notes |
 |------|-------|--------|-------|
 | 2026-03-03 | 1 — nb_1a | `Merge report text into nb_1a` | 6 markdown cells added (H1, Setup, Plot Unfiltered, Quality Filtering, Filtered Distributions, Save) |
+| 2026-03-03 | 2 — nb_1b | `Merge report text into nb_1b` | 5 markdown cells added (H1, Setup, Download, Update Genome Files, Save); removed unused DEBUG variable |
