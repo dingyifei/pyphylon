@@ -34,4 +34,10 @@ dependencies:
     - kneebow
     - kaleido
     - marimo>=0.10.0
+    - vegafusion[embed]
+    - vl-convert-python
+    - openai
+    - mcp
+    - python-lsp-server
+    - websockets
     - ruff>=0.9.0

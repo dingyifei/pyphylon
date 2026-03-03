@@ -1,0 +1,7 @@
+[save]
+autosave = "after_delay"
+autosave_delay = 1000
+format_on_save = true
+
+[formatting]
+line_length = 88

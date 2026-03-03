@@ -33,5 +33,13 @@ pyyaml==6.0.3
 # Marimo notebook framework
 marimo>=0.10.0
 
+# Marimo optional features
+vegafusion[embed]          # server-side Vega charts
+vl-convert-python          # Vega-Lite chart export
+openai                     # AI assistant features
+mcp                        # MCP server connectivity
+python-lsp-server          # Language Server Protocol
+websockets                 # LSP transport
+
 # Dev tools
 ruff>=0.9.0

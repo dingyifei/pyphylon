@@ -182,3 +182,6 @@ notebooks/__marimo__/
 
 # Snakemake
 .snakemake/
+
+# Docker build stamp (used by run.sh)
+.docker-build-stamp
