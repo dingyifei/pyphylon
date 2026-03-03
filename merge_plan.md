@@ -208,13 +208,13 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 15: Notebook 5f — Infer Affinities
-- [ ] **Marimo:** `notebooks/5f_infer_affinities.py`
-- [ ] **Quarto:** `reports/5f_infer_affinities.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/5f_infer_affinities.ipynb`
-- [ ] Add H1 title + overview (NNLS affinity estimation, 5-NN MASH cluster classification)
-- [ ] Add `## MASH Cluster Assignments` — use `mo.ui.table()`
-- [ ] Add `## Affinity Heatmap`
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/5f_infer_affinities.py`
+- [x] **Quarto:** `reports/5f_infer_affinities.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/5f_infer_affinities.ipynb`
+- [x] Add H1 title + overview (NNLS affinity estimation, 5-NN MASH cluster classification)
+- [x] Add `## MASH Cluster Assignments` — use `mo.ui.table()`
+- [x] Add `## Affinity Heatmap`
+- [x] Lint + commit
 
 ### Stage 16: Snakefile Cleanup
 - [ ] Remove all 15 `report_*` rules (lines 272–462)
@@ -259,3 +259,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | 2026-03-03 | 12 — nb_5c | `Merge report text into nb_5c` | 9 markdown cells added (H1 + overview, Setup, Load Inputs, Build GO Mapping, Compute Enrichments, Top Enrichments, Enrichment Heatmap, Phylon Wordclouds, Summary); `mo.ui.table()` for enrichment results; `mo.ui.tabs()` for per-phylon wordclouds; removed unused `FIG` param from enrichment cell |
 | 2026-03-03 | 13 — nb_5d | `Merge report text into nb_5d` | 10 markdown cells added (H1 + overview, Setup, Load Inputs, Parse GFF Files, Gene Order Standardization, Genetic Variation, Gene Length Distribution, Circular Genome Plots, Unique Genes by Phylon, Save Results); `mo.ui.tabs()` + `mo.ui.plotly()` for per-phylon circular genome plots; `mo.ui.table()` for unique gene counts |
 | 2026-03-03 | 14 — nb_5e | `Merge report text into nb_5e` | 7 markdown cells added (H1 + overview, Setup, Extract Representative Sequences, VFDB Enrichment Results, Custom Queries with blastp example, Save Results); `mo.ui.table()` for VFDB hits |
+| 2026-03-03 | 15 — nb_5f | `Merge report text into nb_5f` | 8 markdown cells added (H1 + overview, Setup, Load Inputs, Load Workflow Outputs, MASH Cluster Assignments, Infer Phylon Affinities, Affinity Heatmap, Save Results); split monolithic classify+infer cell into separate MASH classify and NNLS infer cells; `mo.ui.table()` for MASH cluster assignments |
