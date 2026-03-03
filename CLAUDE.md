@@ -8,6 +8,23 @@ Pyphylon is a Python bioinformatics package for analyzing and visualizing co-occ
 
 ## Development Commands
 
+### Pipeline Modes
+
+The pipeline supports two execution modes. The Snakefile's `container:` directives are ignored when `--sdm apptainer` is not passed, so the same workflow works in both modes.
+
+**Conda native** (macOS ARM / Linux) — all bio tools installed via conda, no Docker needed:
+```bash
+conda env update -f conda/environment-marimo.yml
+conda activate pyphylon-marimo
+snakemake --cores 8 --resources jupyter_kernel=1
+```
+
+**Docker** (amd64 platforms / CI) — containerized bio tools via Apptainer:
+```bash
+docker compose build
+docker compose run --rm pipeline snakemake --cores 8 --sdm apptainer
+```
+
 ### Environment Setup (macOS)
 
 **Conda environment**: `pyphylon-marimo` (miniconda, Python 3.x, marimo 0.20.2, pandas 3.0.0)

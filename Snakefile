@@ -117,6 +117,7 @@ rule nb_2c:
     input:
         config="config.yml",
         metadata=f"{TEMP}/2b_genome_metadata.csv",
+        cdhit=f"{DATA}/processed/cd-hit-results/{SPECIES}",
     output:
         f"{DATA}/processed/cd-hit-results/{SPECIES}_strain_by_gene.pickle.gz",
         f"{DATA}/processed/cd-hit-results/{SPECIES}_strain_by_allele.pickle.gz",
@@ -281,6 +282,8 @@ rule report_1a:
         f"{OUT}/data/1a_df_filtration.csv",
     output:
         f"{REP}/1a_genome_filtering.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/1a_genome_filtering.qmd --to pdf"
 
@@ -290,6 +293,8 @@ rule report_1b:
         f"{TEMP}/1b_genome_metadata.csv",
     output:
         f"{REP}/1b_genome_download.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/1b_genome_download.qmd --to pdf"
 
@@ -299,6 +304,8 @@ rule report_2a:
         f"{TEMP}/2a_genome_metadata.csv",
     output:
         f"{REP}/2a_clean_metadata.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/2a_clean_metadata.qmd --to pdf"
 
@@ -317,6 +324,8 @@ rule report_2b:
         f"{FIG}/2b_cluster_sizes_final.png",
     output:
         f"{REP}/2b_mash_filtration.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/2b_mash_filtration.qmd --to pdf"
 
@@ -328,6 +337,8 @@ rule report_2c:
         f"{OUT}/data/2c_pangenome_summary.csv",
     output:
         f"{REP}/2c_build_pangenome.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/2c_build_pangenome.qmd --to pdf"
 
@@ -336,6 +347,8 @@ rule report_2d:
         f"{TEMP}/2d_enriched_metadata.csv",
     output:
         f"{REP}/2d_enrich_metadata.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/2d_enrich_metadata.qmd --to pdf"
 
@@ -349,6 +362,8 @@ rule report_3a:
         f"{OUT}/data/3a_car_summary.csv",
     output:
         f"{REP}/3a_extract_CAR.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/3a_extract_CAR.qmd --to pdf"
 
@@ -358,6 +373,8 @@ rule report_3b:
         f"{OUT}/data/3b_heaps_summary.csv",
     output:
         f"{REP}/3b_heaps_plot.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/3b_heaps_plot.qmd --to pdf"
 
@@ -370,6 +387,8 @@ rule report_4a:
         f"{OUT}/data/4a_nmf_summary.csv",
     output:
         f"{REP}/4a_nmf_decomposition.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/4a_nmf_decomposition.qmd --to pdf"
 
@@ -381,6 +400,8 @@ rule report_5a:
         f"{OUT}/data/5a_phylon_summary.csv",
     output:
         f"{REP}/5a_phylon_characterization.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/5a_phylon_characterization.qmd --to pdf"
 
@@ -391,6 +412,8 @@ rule report_5b:
         f"{OUT}/data/5b_gene_diff_stats.csv",
     output:
         f"{REP}/5b_gene_diff.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/5b_gene_diff.qmd --to pdf"
 
@@ -400,6 +423,8 @@ rule report_5c:
         f"{FIG}/5c_enrichment_heatmap.png",
     output:
         f"{REP}/5c_functional_enrichments.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/5c_functional_enrichments.qmd --to pdf"
 
@@ -411,6 +436,8 @@ rule report_5d:
         f"{OUT}/data/5d_unique_genes_by_phylon.csv",
     output:
         f"{REP}/5d_gene_alignment.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/5d_gene_alignment.qmd --to pdf"
 
@@ -419,6 +446,8 @@ rule report_5e:
         f"{OUT}/data/5e_blast_summary.csv",
     output:
         f"{REP}/5e_blast_enrichment.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/5e_blast_enrichment.qmd --to pdf"
 
@@ -427,5 +456,7 @@ rule report_5f:
         f"{OUT}/data/5f_affinity_summary.csv",
     output:
         f"{REP}/5f_infer_affinities.pdf"
+    resources:
+        jupyter_kernel=1
     shell:
         "quarto render reports/5f_infer_affinities.qmd --to pdf"

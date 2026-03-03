@@ -22,6 +22,12 @@ dependencies:
   - beautifulsoup4
   - pyyaml
   - blast
+  - snakemake
+  - bakta
+  - mlst
+  - cd-hit
+  - mashtree
+  - jupyter
   - pip
   - pip:
     - prince
