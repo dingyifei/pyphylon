@@ -14,6 +14,24 @@ with app.setup:
 
 @app.cell
 def _():
+    mo.md(
+        """
+        # 2d: Enrich Metadata
+
+        Join MLST (Multi-Locus Sequence Typing) results into the
+        mash-filtered genome metadata. Each genome is mapped to its
+        sequence type; non-exact allele matches are recorded as ST = −1.
+        """
+    )
+
+
+@app.cell
+def _():
+    mo.md("## Setup")
+
+
+@app.cell
+def _():
     """Parse config and set up directories."""
     config_path = "config.yml"
     if "--config" in sys.argv:
@@ -26,6 +44,11 @@ def _():
     DATA = CONFIG["DATA_DIR"]
 
     return CONFIG, DATA, TEMP
+
+
+@app.cell
+def _():
+    mo.md("## Load Inputs")
 
 
 @app.cell
@@ -68,6 +91,19 @@ def _(DATA, TEMP):
 
 
 @app.cell
+def _():
+    mo.md(
+        """
+        ## MLST Sequence Type Distribution
+
+        Enrich metadata by joining MLST sequence types. Each genome is
+        mapped to its ST via the MLST report; dashes (non-exact allele
+        matches) are replaced with −1.
+        """
+    )
+
+
+@app.cell
 def _(metadata_2b, mlst_df):
     """Enrich metadata with MLST sequence types (vectorized merge)."""
     mlst_map = mlst_df.set_index("genome_id")["mlst"].replace("-", -1)
@@ -75,17 +111,29 @@ def _(metadata_2b, mlst_df):
     enriched_metadata["mlst"] = enriched_metadata["genome_id"].map(mlst_map)
 
     _n_matched = enriched_metadata["mlst"].notna().sum()
-    _mlst_counts = enriched_metadata["mlst"].value_counts().head(10)
+    _mlst_counts = enriched_metadata["mlst"].value_counts()
 
     mo.output.replace(
-        mo.md(
-            f"MLST enrichment:\n\n"
-            f"- Matched: **{_n_matched}** / {enriched_metadata.shape[0]} genomes\n"
-            f"- Unique STs: **{enriched_metadata['mlst'].nunique()}**\n\n"
-            f"Top 10 sequence types:\n\n" + _mlst_counts.to_markdown()
-        )
+        mo.vstack([
+            mo.md(
+                f"MLST enrichment:\n\n"
+                f"- Matched: **{_n_matched}** / {enriched_metadata.shape[0]} genomes\n"
+                f"- Unique STs: **{enriched_metadata['mlst'].nunique()}**\n\n"
+                f"Top 20 sequence types:"
+            ),
+            mo.ui.table(
+                _mlst_counts.head(20).reset_index().rename(
+                    columns={"index": "ST", "count": "Genomes"}
+                )
+            ),
+        ])
     )
     return (enriched_metadata,)
+
+
+@app.cell
+def _():
+    mo.md("## Save Enriched Metadata")
 
 
 @app.cell

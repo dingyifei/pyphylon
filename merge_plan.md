@@ -117,13 +117,13 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 - [x] Lint + commit
 
 ### Stage 6: Notebook 2d — Enrich Metadata
-- [ ] **Marimo:** `notebooks/2d_enrich_metadata.py`
-- [ ] **Quarto:** `reports/2d_enrich_metadata.qmd`
-- [ ] **Ref Jupyter:** `ref_repo/pyphylon/examples/2d_enrich_metadata.ipynb`
-- [ ] Add H1 title + overview (MLST join)
-- [ ] Add `## MLST Sequence Type Distribution` before MLST cell
-- [ ] Consider `mo.ui.table()` for MLST counts
-- [ ] Lint + commit
+- [x] **Marimo:** `notebooks/2d_enrich_metadata.py`
+- [x] **Quarto:** `reports/2d_enrich_metadata.qmd`
+- [x] **Ref Jupyter:** `ref_repo/pyphylon/examples/2d_enrich_metadata.ipynb`
+- [x] Add H1 title + overview (MLST join)
+- [x] Add `## MLST Sequence Type Distribution` before MLST cell
+- [x] Consider `mo.ui.table()` for MLST counts
+- [x] Lint + commit
 
 ### Stage 7: Notebook 3a — Extract CAR
 - [ ] **Marimo:** `notebooks/3a_extract_CAR.py`
@@ -250,3 +250,4 @@ One commit per stage: `Merge report text into nb_<ID>` (e.g., `Merge report text
 | 2026-03-03 | 3 — nb_2a | `Merge report text into nb_2a` | 4 markdown cells added (H1 + overview, Setup, De-duplicate Entries, Save Files) |
 | 2026-03-03 | 4 — nb_2b | `Merge report text into nb_2b` | 8 markdown cells added (H1 + overview, Setup, Raw Mash Distances, Distance Distribution, Sensitivity Analysis, Initial Clustering, Final Clustering, Summary Statistics, Save); `mo.ui.table()` for cluster sizes |
 | 2026-03-03 | 5 — nb_2c | `Merge report text into nb_2c` | 7 markdown cells added (H1 + overview, Setup, Load Metadata, Discover BAKTA Annotations, Build CDS Pangenome, Genes per Genome Distribution, Save Summary) |
+| 2026-03-03 | 6 — nb_2d | `Merge report text into nb_2d` | 5 markdown cells added (H1 + overview, Setup, Load Inputs, MLST Sequence Type Distribution, Save); `mo.ui.table()` for top-20 ST counts |
