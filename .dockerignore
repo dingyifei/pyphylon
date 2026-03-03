@@ -1,0 +1,11 @@
+.git
+data/
+temp/
+output/
+examples/
+__pycache__/
+*.py[cod]
+.snakemake/
+__marimo__/
+.DS_Store
+.claude/

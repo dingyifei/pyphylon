@@ -1,14 +1,14 @@
 # pyphylon-marimo unified configuration
 # This config is read by both marimo notebooks and the master Snakefile
 
-# --- Directories ---
-TEMP_DIR: "temp/"
-OUTPUT_DIR: "output/"
-DATA_DIR: "data/"
-INPUT_DIR: "input/"
-FIGURES_DIR: "output/figures/"
-REPORTS_DIR: "output/reports/"
-SNAKEMAKE_DATA_DIR: "data/"
+# --- Directories (no trailing slashes) ---
+TEMP_DIR: "temp"
+OUTPUT_DIR: "output"
+DATA_DIR: "data"
+INPUT_DIR: "input"
+FIGURES_DIR: "output/figures"
+REPORTS_DIR: "output/reports"
+SNAKEMAKE_DATA_DIR: "data"
 
 # --- Species ---
 SPECIES_NAME: "Campylobacter jejuni"
@@ -23,6 +23,18 @@ REUSE_TEMP: true
 MASH_RANK: 16
 SMALL_CLUSTER_LIMIT: 5
 
+# --- Bioinformatics Workflow ---
+BAKTA_DB_DIR: "temp/db-light"
+BAKTA_THREADS: 8
+CDHIT_THREADS: 8
+MLST_THREADS: 4
+
+# --- Container Images (pinned SHAs) ---
+CONTAINER_BAKTA: "docker://oschwengers/bakta@sha256:86036e6a8eb836a3dd2d53e84cc3e63623e56b7f192fac12f8cb5da56859b039"
+CONTAINER_MASH: "docker://staphb/mashtree@sha256:731bbb7479f2210618425840f97f7f805078b2414bfc49ea59d9e27c3c0db326"
+CONTAINER_CDHIT: "docker://biocontainers/cd-hit@sha256:e4a7cf8813264803b1229b2dd2aaa396a6020798bc64595d2b880a5aad01d927"
+CONTAINER_MLST: "docker://staphb/mlst@sha256:f1d99e11847bf58c7a895b1047704ebbafd16e1273d7ce7fffe1450ccf2b6d1b"
+
 # --- Legacy compatibility (maps to original config keys) ---
-WORKDIR: "temp/"
+WORKDIR: "temp"
 FILTERED_GENOMES_FILE: "temp/2b_genome_metadata.csv"

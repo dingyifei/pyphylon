@@ -60,26 +60,23 @@ pytest pyphylon/test/test_util.py
 
 ### Docker Workflows
 
-**Note**: Base shell is PowerShell on Windows. WSL containers have full Docker and miniforge conda available.
+Uses `docker-compose.yml` with OrbStack (macOS) or Docker Desktop. The entire repo is bind-mounted; code changes are instantly visible without rebuilding.
 
 ```bash
-# Build container
-docker build -t pyphylon .
+# Build image (only needed when requirements.txt changes)
+docker compose build
 
-# Run bioinformatics workflows
-# PowerShell (Windows):
-docker run --privileged -it -v ${PWD}/examples:/examples -v ${PWD}/workflow:/workflow pyphylon
+# Full pipeline (notebooks + bio workflows + reports)
+docker compose run pipeline snakemake --cores 4 --sdm apptainer
 
-# WSL2/Linux:
-docker run --privileged -it -v $(pwd)/examples:/examples -v $(pwd)/workflow:/workflow pyphylon
+# Bio workflow only
+docker compose run pipeline snakemake pangenome_mash --cores 4 --sdm apptainer
 
-# Inside container - Mash workflow
-cd workflow/mash
-snakemake -d /examples/data --use-singularity -c 10
+# Single notebook rule
+docker compose run pipeline snakemake nb_1a --cores 4
 
-# Inside container - Annotation, MLST, CD-HIT workflow
-cd /workflow/anno_mlst_cdhit
-snakemake -d /examples/data --use-singularity -c 10
+# Interactive shell
+docker compose run pipeline bash
 ```
 
 ## Architecture Overview
@@ -112,24 +109,36 @@ The `NmfData` class in `core.py` manages all analysis matrices:
 - **metadata_table**: Strain metadata (MLST, serotype, etc.)
 
 ### Workflow Integration
-The package integrates Jupyter notebooks (`examples/`) with Snakemake workflows (`workflow/`) for reproducible bioinformatics pipelines:
+The package integrates marimo notebooks (`notebooks/`) with Snakemake workflows (`workflow/`) for reproducible bioinformatics pipelines. The master `Snakefile` uses `include:` to pull in three bio workflow Snakefiles:
 
 - **Notebooks 1a-1b**: Genome filtering and downloading from BV-BRC
-- **Mash workflow**: Genome distance calculation and species filtering
-- **Notebooks 2a-2b**: Mash-based strain filtering
-- **Anno/MLST/CD-HIT workflow**: Annotation, typing, pangenome construction
+- **Mash workflow** (`workflow/mash/`): Genome distance calculation — feeds into nb_2b
+- **Notebooks 2a-2b**: Mash-based strain filtering (2b is a Snakemake checkpoint)
+- **Anno/MLST/CD-HIT workflow** (`workflow/anno_mlst_cdhit/`): Annotation, typing, pangenome construction — feeds into nb_2c, nb_2d
 - **Notebooks 2c-2d**: Pangenome matrix generation and metadata enrichment
 - **Notebooks 3a-4a**: Core/accessory/rare analysis and NMF decomposition
-- **Notebooks 5a-5f**: Phylon characterization and functional analysis
+- **Notebooks 5a-5e**: Phylon characterization and functional analysis
+- **Infer affinities workflow** (`workflow/infer_affinities/`): Compare new strains to pangenome — feeds into nb_5f
+- **Notebook 5f**: Affinity inference visualization
 
 ## Key Configuration Files
 
-### Workflow Configuration (`examples/config.yml`)
+### Workflow Configuration (`config.yml` — repository root)
 ```yaml
-WORKDIR: "data/"
 SPECIES_NAME: "Campylobacter jejuni"
 PG_NAME: "CJejuni"
 TAXON_ID: 197
+DATA_DIR: "data/"
+TEMP_DIR: "temp/"
+OUTPUT_DIR: "output/"
+BAKTA_DB_DIR: "temp/db-light"
+BAKTA_THREADS: 8
+CDHIT_THREADS: 8
+MLST_THREADS: 4
+CONTAINER_BAKTA: "docker://oschwengers/bakta@sha256:..."
+CONTAINER_MASH: "docker://staphb/mashtree@sha256:..."
+CONTAINER_CDHIT: "docker://biocontainers/cd-hit@sha256:..."
+CONTAINER_MLST: "docker://staphb/mlst@sha256:..."
 ```
 
 ### BV-BRC API
@@ -148,18 +157,25 @@ The pipeline can fetch genome metadata directly from the BV-BRC Data API using `
 
 ## Data Flow and File Structure
 
-### Expected Directory Structure for Examples
+### Directory Structure
 ```
-examples/data/
-├── raw/genomes/fna/          # Input genome files (.fna)
-├── interim/                  # Intermediate CSV files
+data/                          # Git submodule (LFS-backed)
+├── raw/genomes/fna/           # Input genome files (.fna)
 ├── processed/
-│   ├── bakta/               # Genome annotations
-│   ├── cd-hit-results/      # Pangenome clusters
-│   ├── mlst/                # MLST typing results
-│   ├── mash/                # Genome sketches/distances
-│   ├── CAR_genomes/         # Core/accessory/rare analysis
-│   └── nmf-outputs/         # NMF decomposition results
+│   ├── bakta/                 # Genome annotations
+│   ├── cd-hit-results/        # Pangenome clusters
+│   ├── mlst/                  # MLST typing results
+│   ├── CAR_genomes/           # Core/accessory/rare analysis
+│   └── nmf-outputs/           # NMF decomposition results
+├── inferring_affinities/      # New strain data for affinity inference
+temp/                          # Intermediate files (gitignored)
+├── 1a_*, 1b_*, 2a_*, 2b_*    # Per-step CSV intermediates
+├── 2b_mash/                   # Mash sketches and distances
+└── db-light/                  # BAKTA database
+output/
+├── figures/                   # PNG plots per step
+├── data/                      # Summary CSVs per step
+└── reports/                   # Quarto PDF reports
 ```
 
 ### Critical Matrix Files
@@ -205,12 +221,6 @@ examples/data/
 - **Docker image**: `pyphylon:latest` (snakemake/snakemake:v8.30.0 base, Debian Bookworm, 3.96GB)
 - **Note**: Use `MSYS_NO_PATHCONV=1` prefix when running wsl commands from Git Bash to avoid path mangling.
 
-## Progress Logs
+## Progress Tracking
 
-Progress logs are stored in `progress_logs/` and track work done on this project.
-
-### Format Requirements
-Each log entry must include:
-- **Date/time** of the operation
-- **Key steps** performed (numbered)
-- **Access instructions** for anything set up (commands, paths, URLs)
+The authoritative conversion progress tracker is `adaptation_plan.md` (if present). All 15 notebook conversions (1a through 5f) are complete. The pipeline is orchestrated by the master `Snakefile` with three included bio workflow Snakefiles.

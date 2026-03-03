@@ -14,6 +14,11 @@ FIG = config["FIGURES_DIR"]
 REP = config["REPORTS_DIR"]
 DATA = config["DATA_DIR"]
 SPECIES = config["PG_NAME"]
+FILTERED_GENOMES_FILE = config["FILTERED_GENOMES_FILE"]
+
+include: "workflow/mash/Snakefile"
+include: "workflow/anno_mlst_cdhit/Snakefile"
+include: "workflow/infer_affinities/Snakefile"
 
 # =============================================================================
 # Default target: all reports
@@ -71,13 +76,8 @@ rule nb_1b:
         "python notebooks/1b_download_genomes.py -- --config {input.config}"
 
 # =============================================================================
-# Bioinformatics: Mash Workflow
-# =============================================================================
-
-# TODO: Integrate workflow/mash/Snakefile rules
-
-# =============================================================================
 # Phase 2: Mash Filtration & Pangenome Construction
+# (Mash workflow rules included from workflow/mash/Snakefile)
 # =============================================================================
 
 rule nb_2a:
@@ -91,25 +91,25 @@ rule nb_2a:
     shell:
         "python notebooks/2a_clean_metadata.py -- --config {input.config}"
 
-rule nb_2b:
+checkpoint nb_2b_checkpoint:
     input:
         config="config.yml",
         summary=f"{TEMP}/2a_genome_summary.csv",
         metadata=f"{TEMP}/2a_genome_metadata.csv",
         mash_dist=f"{TEMP}/2b_mash/mash_distances.txt",
     output:
-        temp(f"{TEMP}/2b_genome_summary.csv"),
-        temp(f"{TEMP}/2b_genome_metadata.csv"),
-        f"{OUT}/data/2b_mash_square.csv",
-        f"{OUT}/data/2b_mash_corr_dist.csv",
-        f"{FIG}/2b_mash_heatmap.png",
-        f"{FIG}/2b_mash_dist_all.png",
-        f"{FIG}/2b_mash_dist_filtered.png",
-        f"{FIG}/2b_sensitivity_analysis.png",
-        f"{FIG}/2b_clustermap_initial.png",
-        f"{FIG}/2b_clustermap_final.png",
-        f"{FIG}/2b_cluster_sizes_initial.png",
-        f"{FIG}/2b_cluster_sizes_final.png",
+        summary=temp(f"{TEMP}/2b_genome_summary.csv"),
+        metadata=temp(f"{TEMP}/2b_genome_metadata.csv"),
+        mash_square=f"{OUT}/data/2b_mash_square.csv",
+        mash_corr=f"{OUT}/data/2b_mash_corr_dist.csv",
+        heatmap=f"{FIG}/2b_mash_heatmap.png",
+        dist_all=f"{FIG}/2b_mash_dist_all.png",
+        dist_filtered=f"{FIG}/2b_mash_dist_filtered.png",
+        sensitivity=f"{FIG}/2b_sensitivity_analysis.png",
+        clustermap_init=f"{FIG}/2b_clustermap_initial.png",
+        clustermap_final=f"{FIG}/2b_clustermap_final.png",
+        sizes_init=f"{FIG}/2b_cluster_sizes_initial.png",
+        sizes_final=f"{FIG}/2b_cluster_sizes_final.png",
     shell:
         "python notebooks/2b_mash_filtration.py -- --config {input.config}"
 
@@ -136,13 +136,8 @@ rule nb_2d:
         "python notebooks/2d_enrich_metadata.py -- --config {input.config}"
 
 # =============================================================================
-# Bioinformatics: Annotation, MLST, CD-HIT Workflow
-# =============================================================================
-
-# TODO: Integrate workflow/anno_mlst_cdhit/Snakefile rules
-
-# =============================================================================
 # Phase 3: Genome Characterization
+# (Anno/MLST/CD-HIT workflow rules included from workflow/anno_mlst_cdhit/Snakefile)
 # =============================================================================
 
 rule nb_3a:
@@ -274,13 +269,8 @@ rule nb_5f:
         "python notebooks/5f_infer_affinities.py -- --config {input.config}"
 
 # =============================================================================
-# Bioinformatics: Infer Affinities Workflow
-# =============================================================================
-
-# TODO: Integrate workflow/infer_affinities/Snakefile rules
-
-# =============================================================================
 # Quarto Reports
+# (Infer affinities workflow rules included from workflow/infer_affinities/Snakefile)
 # =============================================================================
 
 rule report_1a:

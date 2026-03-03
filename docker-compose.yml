@@ -1,0 +1,15 @@
+services:
+  pipeline:
+    build:
+      context: .
+      platforms: [linux/amd64]
+    privileged: true
+    volumes:
+      - .:/pipeline
+      - apptainer-cache:/root/.apptainer/cache
+    environment:
+      APPTAINER_CACHEDIR: /root/.apptainer/cache
+    working_dir: /pipeline
+
+volumes:
+  apptainer-cache:

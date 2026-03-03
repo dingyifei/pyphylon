@@ -1,97 +1,96 @@
-
-
-# This snakefile will :
-# 1. annotate all genomes in the data/raw/fna folder using BAKTA
-# 2. Run MLST on all genomes 
-# 3. Build a pan-genome using CD-HIT
-
-configfile: workflow.source_path("/examples/config.yml")
-PG_NAME = config['PG_NAME']
-FILTERED_GENOMES_FILE = config['FILTERED_GENOMES_FILE']
+# Annotation, MLST, and CD-HIT workflow
+# Included by the master Snakefile — expects DATA, TEMP, SPECIES, config variables
+#
+# Rules: anno_get_db, anno_bakta, concat_faas, cdhit, mlst, mlst_report
 
 import pandas as pd
-genomes = pd.read_csv(FILTERED_GENOMES_FILE, dtype={"genome_id":str})
-SAMPLES = genomes['genome_id'].tolist()
 
 
-rule all:
-    input:
-        expand("processed/bakta/{sample}/{sample}.gbff", sample=SAMPLES), # for BATKA annotation
-        'processed/cd-hit-results/' + PG_NAME,
-        'processed/mlst_report.txt'
+def _get_anno_samples(wildcards=None):
+    """Read genome list from the nb_2b checkpoint output (deferred until 2b completes)."""
+    meta_path = checkpoints.nb_2b_checkpoint.get().output.metadata
+    genomes = pd.read_csv(str(meta_path), dtype={"genome_id": str})
+    return genomes["genome_id"].tolist()
 
 
-rule batka_annotation: # https://github.com/oschwengers/bakta
-    input:
-        "raw/genomes/fna/{sample}.fna",
-        directory("db-light")
+rule anno_get_db:
     output:
-        "processed/bakta/{sample}/{sample}.fna",
-        "processed/bakta/{sample}/{sample}.gbff",
-        "processed/bakta/{sample}/{sample}.faa",
-        "processed/bakta/{sample}/{sample}.tsv",
+        directory(config["BAKTA_DB_DIR"])
     container:
-        'docker://oschwengers/bakta@sha256:86036e6a8eb836a3dd2d53e84cc3e63623e56b7f192fac12f8cb5da56859b039'
-    threads: 8
+        config["CONTAINER_BAKTA"]
     shell:
-        "bakta --db db-light --output processed/bakta/{wildcards.sample} --locus-tag {wildcards.sample} --prefix {wildcards.sample} --threads {threads} --force {input[0]}"
+        "wget https://zenodo.org/record/10522951/files/db-light.tar.gz "
+        "&& tar -xzf db-light.tar.gz "
+        "&& mv db-light {output} "
+        "&& rm db-light.tar.gz "
+        "&& amrfinder_update --force_update --database {output}/amrfinderplus-db"
 
-rule get_db:
-    output:
-        directory("db-light")
-    container:
-        'docker://oschwengers/bakta@sha256:86036e6a8eb836a3dd2d53e84cc3e63623e56b7f192fac12f8cb5da56859b039'
-    shell:
-        'wget https://zenodo.org/record/10522951/files/db-light.tar.gz && tar -xzf db-light.tar.gz && rm db-light.tar.gz && amrfinder_update --force_update --database db-light/amrfinderplus-db' #TODO rename dB and add as config var
-        
-rule mash:
+
+rule anno_bakta:
     input:
-        expand("raw/genomes/fna/{sample}.fna", sample=SAMPLES)
+        fna=f"{DATA}/raw/genomes/fna/{{sample}}.fna",
+        db=config["BAKTA_DB_DIR"],
     output:
-        mash_sketch = "processed/mash/combined_sketch.msh",
-        mash_distances = "processed/mash/mash_distances.txt"
-
+        fna=f"{DATA}/processed/bakta/{{sample}}/{{sample}}.fna",
+        gbff=f"{DATA}/processed/bakta/{{sample}}/{{sample}}.gbff",
+        faa=f"{DATA}/processed/bakta/{{sample}}/{{sample}}.faa",
+        tsv=f"{DATA}/processed/bakta/{{sample}}/{{sample}}.tsv",
     container:
-        'docker://staphb/mashtree@sha256:731bbb7479f2210618425840f97f7f805078b2414bfc49ea59d9e27c3c0db326'
+        config["CONTAINER_BAKTA"]
+    threads:
+        config["BAKTA_THREADS"]
     shell:
-        "mash sketch -o {output.mash_sketch} {input} && mash dist {output.mash_sketch} {output.mash_sketch} > {output.mash_distances}"
+        "bakta --db {input.db} "
+        "--output {DATA}/processed/bakta/{wildcards.sample} "
+        "--locus-tag {wildcards.sample} --prefix {wildcards.sample} "
+        "--threads {threads} --force {input.fna}"
+
 
 rule concat_faas:
     input:
-        expand("processed/bakta/{sample}/{sample}.faa", sample=SAMPLES)
+        lambda wc: expand(
+            f"{DATA}/processed/bakta/{{sample}}/{{sample}}.faa",
+            sample=_get_anno_samples(),
+        )
     output:
-        "raw/{PG_NAME}.faa"
+        f"{TEMP}/{SPECIES}.faa"
     shell:
         "cat {input} > {output}"
 
+
 rule cdhit:
     input:
-        "raw/{PG_NAME}.faa"
+        f"{TEMP}/{SPECIES}.faa"
     output:
-        "processed/cd-hit-results/{PG_NAME}"
+        f"{DATA}/processed/cd-hit-results/{SPECIES}"
     container:
-        'docker://biocontainers/cd-hit@sha256:e4a7cf8813264803b1229b2dd2aaa396a6020798bc64595d2b880a5aad01d927'
+        config["CONTAINER_CDHIT"]
     threads:
-        8
+        config["CDHIT_THREADS"]
     shell:
-        'cdhit -i {input} -o {output} -d 0 -n 5 -c 0.8 -M 0 -aL 0.8 -T {threads}'
+        "cdhit -i {input} -o {output} -d 0 -n 5 -c 0.8 -M 0 -aL 0.8 -T {threads}"
+
 
 rule mlst:
     input:
-        "raw/genomes/fna/{sample}.fna"
+        f"{DATA}/raw/genomes/fna/{{sample}}.fna"
     output:
-        "processed/mlst/{sample}.tsv"
+        f"{DATA}/processed/mlst/{{sample}}.tsv"
     container:
-        'docker://staphb/mlst@sha256:f1d99e11847bf58c7a895b1047704ebbafd16e1273d7ce7fffe1450ccf2b6d1b'
+        config["CONTAINER_MLST"]
     threads:
-        4
+        config["MLST_THREADS"]
     shell:
-        'mlst {input} > {output}'
+        "mlst {input} > {output}"
+
 
 rule mlst_report:
-	input:
-		files=expand("processed/mlst/{sample}.tsv", sample=SAMPLES)
-	output:
-		"processed/mlst_report.txt"
-	shell:
-		"cat {input.files} > {output}"
+    input:
+        files=lambda wc: expand(
+            f"{DATA}/processed/mlst/{{sample}}.tsv",
+            sample=_get_anno_samples(),
+        )
+    output:
+        f"{DATA}/processed/mlst_report.txt"
+    shell:
+        "cat {input.files} > {output}"
