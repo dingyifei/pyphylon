@@ -24,18 +24,6 @@ def make_blast_db(fasta_file, output_location, dbtype = 'prot'):
     print("Finished running, database created at " + output_location)
 
 
-def extract_reference_dna_sequences(cd_hit_results, species, outfile):
-    alleles_to_headers = {}
-    with open(cd_hit_results + '/' + species + '_allele_names.tsv', 'r') as f:
-        for line in f:
-            line = line.split()
-            allele = line[0]
-            for header in line[1:]:
-                alleles_to_headers[header] = allele
-            
-
-    
-
 def extract_reference_sequences(cd_hit_results, species, outfile):
     ''' 
     Extract a file of all of the sequences of representative alleles

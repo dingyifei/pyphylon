@@ -251,7 +251,16 @@ rule nb_5d:
     shell:
         "python notebooks/5d_gene_alignment.py -- --config {input.config}"
 
-# TODO: Add rules for 5e-5f
+rule nb_5e:
+    input:
+        config="config.yml",
+        pickle=f"{DATA}/processed/cd-hit-results/{SPECIES}_strain_by_gene.pickle.gz",
+    output:
+        f"{OUT}/data/5e_blast_summary.csv",
+    shell:
+        "python notebooks/5e_blast_enrichment.py -- --config {input.config}"
+
+# TODO: Add rules for 5f
 
 # =============================================================================
 # Bioinformatics: Infer Affinities Workflow
@@ -403,5 +412,13 @@ rule report_5d:
         f"{REP}/5d_gene_alignment.pdf"
     shell:
         "quarto render reports/5d_gene_alignment.qmd --to pdf"
+
+rule report_5e:
+    input:
+        f"{OUT}/data/5e_blast_summary.csv",
+    output:
+        f"{REP}/5e_blast_enrichment.pdf"
+    shell:
+        "quarto render reports/5e_blast_enrichment.qmd --to pdf"
 
 # TODO: Add report rules as notebooks are converted

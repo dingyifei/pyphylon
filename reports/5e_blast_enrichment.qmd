@@ -1,0 +1,54 @@
+---
+title: "5e: BLAST Enrichment Analysis"
+format:
+  pdf:
+    toc: true
+execute:
+  echo: false
+---
+
+## Summary
+
+BLAST-based enrichment analysis compares pangenome representative sequences
+against external databases (e.g., VFDB virulence factor database) to identify
+functionally relevant genes.
+
+```{python}
+import pandas as pd
+import os
+
+df = pd.read_csv("../output/data/5e_blast_summary.csv")
+for _, row in df.iterrows():
+    print(f"{row['metric']}: {row['value']}")
+```
+
+## VFDB Enrichment Results
+
+Pangenome representative protein sequences searched against VFDB
+(Virulence Factor Database) using blastp with e-value < 1e-5 and
+identity > 80%.
+
+```{python}
+vfdb_path = "../output/data/5e_vfdb_blast_results.csv"
+if os.path.exists(vfdb_path):
+    vfdb = pd.read_csv(vfdb_path)
+    print(f"Total VFDB hits: {len(vfdb)}")
+    print(f"Unique query genes: {vfdb['query'].nunique()}")
+    print(f"Unique VFDB targets: {vfdb['target'].nunique()}")
+else:
+    print("VFDB results not available (VFDB database not downloaded).")
+```
+
+```{python}
+if os.path.exists(vfdb_path):
+    vfdb[['query', 'target', 'identity', 'e_val', 'bitscore']].head(20)
+```
+
+## Custom Queries
+
+A pangenome BLAST database was created from the representative sequences.
+To search custom protein sequences against the pangenome:
+
+```
+blastp -query your_query.fa -db data/external/PangenomeDB/PangenomeDB -outfmt 6
+```
