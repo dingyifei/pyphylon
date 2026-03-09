@@ -213,6 +213,9 @@ rule nb_5a:
         f"{FIG}/5a_L_binarized_sorted.png",
         f"{FIG}/5a_A_binarized_sorted.png",
         f"{OUT}/data/5a_phylon_summary.csv",
+        f"{OUT}/data/5a_phylon_profiles.csv",
+        f"{OUT}/data/5a_phylon_gene_details.csv",
+        f"{OUT}/data/5a_phylon_strain_demographics.csv",
     shell:
         "python notebooks/5a_phylon_characterization.py -- --config {input.config}"
 

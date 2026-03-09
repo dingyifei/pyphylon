@@ -17,6 +17,9 @@ with app.setup:
     from sklearn.linear_model import LinearRegression
     from sklearn.metrics import r2_score
 
+    from pyphylon.biointerp import collect_functions, get_pg_to_locus_map
+    from pyphylon.plotting_util import unique_genes_by_phylon
+
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["figure.dpi"] = 200
     sns.set_palette("deep")
@@ -64,11 +67,12 @@ def _():
     DATA = CONFIG["DATA_DIR"]
     FIG = CONFIG["FIGURES_DIR"]
     OUT = CONFIG["OUTPUT_DIR"]
+    SPECIES = CONFIG["PG_NAME"]
 
     os.makedirs(FIG, exist_ok=True)
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
     os.makedirs(os.path.join(DATA, "processed", "nmf-outputs"), exist_ok=True)
-    return DATA, FIG, OUT, TEMP
+    return DATA, FIG, OUT, SPECIES, TEMP
 
 
 @app.cell
@@ -107,7 +111,7 @@ def _(DATA, TEMP):
             f"- **Number of phylons:** {n_phylons}"
         )
     )
-    return A_norm, L_norm, df_acc, n_phylons
+    return A_norm, L_norm, df_acc, metadata, n_phylons
 
 
 @app.cell
@@ -421,6 +425,272 @@ def _(A_binarized, A_norm, DATA, L_binarized, L_norm, OUT, n_phylons, r2):
             f"- Summary: {n_phylons} phylons, R² = {r2:.4f}"
         )
     )
+    return
+
+
+@app.cell
+def _():
+    mo.md("""
+    ## Per-Phylon Characterization
+
+    Detailed profiles for each phylon — gene counts, exclusive genes,
+    functional annotations, and strain demographics — to support
+    biological interpretation and phylon naming.
+    """)
+    return
+
+
+@app.cell
+def _(A_binarized, A_norm, L_binarized, L_norm):
+    """Compute per-phylon profile summary table."""
+    exclusive_genes_dict = unique_genes_by_phylon(L_binarized)
+
+    _rows = []
+    for _p in L_binarized.columns:
+        _gene_mask = L_binarized[_p] == 1
+        _strain_mask = A_binarized.loc[_p] == 1
+        _ng = int(_gene_mask.sum())
+        _ns = int(_strain_mask.sum())
+        _ne = len(exclusive_genes_dict.get(_p, []))
+        _rows.append(
+            {
+                "phylon": _p,
+                "n_genes": _ng,
+                "n_strains": _ns,
+                "n_exclusive_genes": _ne,
+                "pct_exclusive": round(_ne / _ng * 100, 1) if _ng > 0 else 0,
+                "mean_L_weight": round(L_norm.loc[_gene_mask, _p].mean(), 4) if _ng > 0 else 0,
+                "mean_A_weight": round(A_norm.loc[_p, _strain_mask].mean(), 4) if _ns > 0 else 0,
+            }
+        )
+
+    phylon_profiles = pd.DataFrame(_rows).sort_values("n_exclusive_genes", ascending=False).reset_index(drop=True)
+
+    mo.output.replace(
+        mo.vstack(
+            [
+                mo.md("### Phylon Profiles (sorted by exclusive gene count)"),
+                mo.ui.table(phylon_profiles),
+            ]
+        )
+    )
+    return exclusive_genes_dict, phylon_profiles
+
+
+@app.cell
+def _(DATA, L_binarized, SPECIES, exclusive_genes_dict):
+    """Map genes to functional annotations via BAKTA/CD-HIT."""
+    cluster_products = {}
+    phylon_gene_details = None
+
+    try:
+        _all_funcs_path = os.path.join(DATA, "processed", "all_functions.csv")
+        _bakta_dir = os.path.join(DATA, "processed", "bakta")
+
+        if os.path.exists(_all_funcs_path):
+            _funcs = pd.read_csv(_all_funcs_path)
+        elif os.path.isdir(_bakta_dir):
+            _funcs = collect_functions(DATA, "processed/bakta/")
+        else:
+            raise FileNotFoundError("No annotation data available")
+
+        _pg_map = get_pg_to_locus_map(DATA, SPECIES)
+        _locus_products = _funcs[["locus", "product"]].drop_duplicates()
+        _pg_annotated = _pg_map.merge(_locus_products, left_on="gene_id", right_on="locus", how="left")
+        cluster_products = (
+            _pg_annotated.groupby("cluster")["product"].apply(lambda x: "; ".join(x.dropna().unique())).to_dict()
+        )
+
+        # Also build GO mapping
+        if "go" in _funcs.columns:
+            _locus_go = _funcs[["locus", "go"]].drop_duplicates()
+            _pg_go = _pg_map.merge(_locus_go, left_on="gene_id", right_on="locus", how="left")
+            _cluster_go = _pg_go.groupby("cluster")["go"].apply(lambda x: "; ".join(x.dropna().unique())).to_dict()
+        else:
+            _cluster_go = {}
+
+        _rows = []
+        for _p in L_binarized.columns:
+            _genes = L_binarized.index[L_binarized[_p] == 1].tolist()
+            _exclusive = set(exclusive_genes_dict.get(_p, []))
+            for _g in _genes:
+                _rows.append(
+                    {
+                        "phylon": _p,
+                        "gene": _g,
+                        "is_exclusive": _g in _exclusive,
+                        "product": cluster_products.get(_g, ""),
+                        "go": _cluster_go.get(_g, ""),
+                    }
+                )
+        phylon_gene_details = pd.DataFrame(_rows)
+
+        mo.output.replace(
+            mo.md(
+                f"Gene annotations loaded: **{len(cluster_products)}** clusters mapped to products\n\n"
+                f"Detail table: **{len(phylon_gene_details)}** gene-phylon pairs"
+            )
+        )
+    except Exception as _e:
+        mo.output.replace(mo.callout(mo.md(f"Could not load annotations: {_e}"), kind="warn"))
+
+    return cluster_products, phylon_gene_details
+
+
+@app.cell
+def _(A_binarized, metadata):
+    """Compute strain demographics (MLST, serovar, host, country) per phylon."""
+    _categories = ["mlst", "serovar", "host_name", "isolation_country", "mash_cluster"]
+    _available = [c for c in _categories if c in metadata.columns]
+
+    _rows = []
+    for _p in A_binarized.index:
+        _strain_ids = A_binarized.columns[A_binarized.loc[_p] == 1].tolist()
+        _meta_sub = metadata[metadata["genome_id"].isin(_strain_ids)]
+        _n = len(_meta_sub)
+        if _n == 0:
+            continue
+        for _cat in _available:
+            _counts = _meta_sub[_cat].fillna("Unknown").value_counts()
+            for _val, _cnt in _counts.items():
+                _rows.append(
+                    {
+                        "phylon": _p,
+                        "category": _cat,
+                        "value": str(_val),
+                        "count": int(_cnt),
+                        "pct": round(_cnt / _n * 100, 1),
+                    }
+                )
+
+    phylon_strain_demographics = pd.DataFrame(_rows)
+    mo.output.replace(
+        mo.md(f"Strain demographics: **{len(phylon_strain_demographics)}** entries across {len(_available)} categories")
+    )
+    return (phylon_strain_demographics,)
+
+
+@app.cell
+def _():
+    mo.md("""
+    ## Phylon Explorer
+
+    Select a phylon to view its detailed profile: gene counts, top gene
+    products, strain MLST/serovar breakdown, and exclusive gene list.
+    """)
+    return
+
+
+@app.cell
+def _(phylon_profiles):
+    """Dropdown to select a phylon for exploration."""
+    phylon_dropdown = mo.ui.dropdown(
+        options=phylon_profiles["phylon"].tolist(),
+        value=phylon_profiles.iloc[0]["phylon"],
+        label="Select phylon",
+    )
+    phylon_dropdown
+    return (phylon_dropdown,)
+
+
+@app.cell
+def _(phylon_dropdown, phylon_profiles):
+    """Display stat cards for selected phylon."""
+    _sel = phylon_dropdown.value
+    _row = phylon_profiles[phylon_profiles["phylon"] == _sel].iloc[0]
+
+    mo.vstack(
+        [
+            mo.md(f"### {_sel}"),
+            mo.hstack(
+                [
+                    mo.stat(value=str(int(_row["n_genes"])), label="Genes"),
+                    mo.stat(value=str(int(_row["n_strains"])), label="Strains"),
+                    mo.stat(value=str(int(_row["n_exclusive_genes"])), label="Exclusive Genes"),
+                    mo.stat(value=f"{_row['pct_exclusive']}%", label="% Exclusive"),
+                ],
+                justify="center",
+                gap="2rem",
+            ),
+            mo.hstack(
+                [
+                    mo.stat(value=str(_row["mean_L_weight"]), label="Mean L Weight"),
+                    mo.stat(value=str(_row["mean_A_weight"]), label="Mean A Weight"),
+                ],
+                justify="center",
+                gap="2rem",
+            ),
+        ]
+    )
+    return
+
+
+@app.cell
+def _(phylon_dropdown, phylon_gene_details, phylon_strain_demographics):
+    """Display detailed tabs for selected phylon."""
+    _sel = phylon_dropdown.value
+    _tabs = {}
+
+    # Top gene products
+    if phylon_gene_details is not None:
+        _pgd = phylon_gene_details[phylon_gene_details["phylon"] == _sel]
+        _products = _pgd["product"].str.split("; ").explode().str.strip()
+        _products = _products[(_products != "") & (_products.notna())]
+        _prod_counts = _products.value_counts().head(20).reset_index()
+        _prod_counts.columns = ["product", "count"]
+        _tabs["Top Products"] = mo.ui.table(_prod_counts)
+
+        # Exclusive genes with products
+        _excl = _pgd[_pgd["is_exclusive"]].copy()
+        if len(_excl) > 0:
+            _tabs[f"Exclusive Genes ({len(_excl)})"] = mo.ui.table(_excl[["gene", "product"]].reset_index(drop=True))
+        else:
+            _tabs["Exclusive Genes (0)"] = mo.md("*No exclusive genes for this phylon.*")
+
+        # All genes
+        _tabs[f"All Genes ({len(_pgd)})"] = mo.ui.table(
+            _pgd[["gene", "is_exclusive", "product"]].reset_index(drop=True)
+        )
+
+    # Strain demographics
+    if len(phylon_strain_demographics) > 0:
+        _demo = phylon_strain_demographics[phylon_strain_demographics["phylon"] == _sel]
+        for _cat in _demo["category"].unique():
+            _cat_df = _demo[_demo["category"] == _cat][["value", "count", "pct"]].reset_index(drop=True)
+            _tabs[_cat.replace("_", " ").title()] = mo.ui.table(_cat_df)
+
+    if _tabs:
+        mo.output.replace(mo.ui.tabs(_tabs))
+    else:
+        mo.output.replace(mo.md("*No detail data available.*"))
+    return
+
+
+@app.cell
+def _():
+    mo.md("""
+    ## Save Characterization Outputs
+    """)
+    return
+
+
+@app.cell
+def _(OUT, phylon_gene_details, phylon_profiles, phylon_strain_demographics):
+    """Save per-phylon characterization CSVs."""
+    _saved = []
+
+    phylon_profiles.to_csv(os.path.join(OUT, "data", "5a_phylon_profiles.csv"), index=False)
+    _saved.append(f"- `5a_phylon_profiles.csv`: {len(phylon_profiles)} phylons")
+
+    if phylon_gene_details is not None and len(phylon_gene_details) > 0:
+        phylon_gene_details.to_csv(os.path.join(OUT, "data", "5a_phylon_gene_details.csv"), index=False)
+        _saved.append(f"- `5a_phylon_gene_details.csv`: {len(phylon_gene_details)} gene-phylon pairs")
+
+    if len(phylon_strain_demographics) > 0:
+        phylon_strain_demographics.to_csv(os.path.join(OUT, "data", "5a_phylon_strain_demographics.csv"), index=False)
+        _saved.append(f"- `5a_phylon_strain_demographics.csv`: {len(phylon_strain_demographics)} entries")
+
+    mo.output.replace(mo.md("Saved characterization outputs:\n\n" + "\n".join(_saved)))
     return
 
 
