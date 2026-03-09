@@ -26,30 +26,32 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 5f: Infer Affinities
+    mo.md("""
+    # 5f: Infer Affinities
 
-        Estimate phylon affinities for **new query genomes** that were not part
-        of the original NMF decomposition.  The pipeline has two stages:
+    Estimate phylon affinities for **new query genomes** that were not part
+    of the original NMF decomposition.  The pipeline has two stages:
 
-        1. **MASH cluster classification** — each new strain is compared to all
-           reference genomes via MASH distances, and the 5 nearest neighbors
-           vote to assign a cluster label.
-        2. **NNLS affinity estimation** — Non-Negative Least Squares projects
-           each new strain's gene-presence vector onto the NMF basis matrix
-           (**L**), producing a phylon-affinity vector that is then binarized
-           at 90 % of the original recommended threshold.
+    1. **MASH cluster classification** — each new strain is compared to all
+       reference genomes via MASH distances, and the 5 nearest neighbors
+       vote to assign a cluster label.
+    2. **NNLS affinity estimation** — Non-Negative Least Squares projects
+       each new strain's gene-presence vector onto the NMF basis matrix
+       (**L**), producing a phylon-affinity vector that is then binarized
+       at 90 % of the original recommended threshold.
 
-        *Prerequisites:* run `workflow/infer_affinities/Snakefile` to generate
-        `combined_P_matrix.csv` and `combined_mash_distances.csv`.
-        """
-    )
+    *Prerequisites:* run `workflow/infer_affinities/Snakefile` to generate
+    `combined_P_matrix.csv` and `combined_mash_distances.csv`.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Setup")
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -69,21 +71,19 @@ def _():
 
     os.makedirs(FIG, exist_ok=True)
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
-
-    return CONFIG, DATA, FIG, OUT, TEMP
+    return DATA, FIG, OUT, TEMP
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Load Inputs
+    mo.md("""
+    ## Load Inputs
 
-        Load the NMF basis matrices (**L_norm**, **A_norm**) and the enriched
-        metadata table.  The metadata provides the MASH cluster labels used
-        for nearest-neighbor classification of new strains.
-        """
-    )
+    Load the NMF basis matrices (**L_norm**, **A_norm**) and the enriched
+    metadata table.  The metadata provides the MASH cluster labels used
+    for nearest-neighbor classification of new strains.
+    """)
+    return
 
 
 @app.cell
@@ -114,20 +114,19 @@ def _(DATA, TEMP):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Load Workflow Outputs
+    mo.md("""
+    ## Load Workflow Outputs
 
-        The `workflow/infer_affinities/Snakefile` produces two files:
+    The `workflow/infer_affinities/Snakefile` produces two files:
 
-        - **combined_P_matrix.csv** — gene-presence matrix for new strains,
-          built by running CD-HIT-2D against the existing pangenome.
-        - **combined_mash_distances.csv** — pairwise MASH distances between
-          every reference genome and each new strain.
+    - **combined_P_matrix.csv** — gene-presence matrix for new strains,
+      built by running CD-HIT-2D against the existing pangenome.
+    - **combined_mash_distances.csv** — pairwise MASH distances between
+      every reference genome and each new strain.
 
-        If these files are missing, downstream cells skip gracefully.
-        """
-    )
+    If these files are missing, downstream cells skip gracefully.
+    """)
+    return
 
 
 @app.cell
@@ -164,21 +163,19 @@ def _(DATA):
                 f"Run `workflow/infer_affinities/Snakefile` first to generate these files."
             )
         )
-
     return P_new_raw, mash_distances
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## MASH Cluster Assignments
+    mo.md("""
+    ## MASH Cluster Assignments
 
-        Each new strain is classified into a MASH cluster using **5-nearest-neighbor
-        majority vote**: the five reference genomes with the smallest MASH distance
-        are identified, and the most common cluster label among them is assigned.
-        """
-    )
+    Each new strain is classified into a MASH cluster using **5-nearest-neighbor
+    majority vote**: the five reference genomes with the smallest MASH distance
+    are identified, and the most common cluster label among them is assigned.
+    """)
+    return
 
 
 @app.cell
@@ -202,26 +199,24 @@ def _(mash_distances, metadata):
         )
     else:
         mo.output.replace(mo.md("**Skipped** \u2014 workflow outputs not available."))
-
     return (strain_mash_clusters,)
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Infer Phylon Affinities
+    mo.md("""
+    ## Infer Phylon Affinities
 
-        Phylon affinities are estimated via **Non-Negative Least Squares (NNLS)**:
-        each new strain's gene-presence vector is projected onto the NMF basis
-        matrix **L_norm**, yielding a continuous affinity score per phylon.
+    Phylon affinities are estimated via **Non-Negative Least Squares (NNLS)**:
+    each new strain's gene-presence vector is projected onto the NMF basis
+    matrix **L_norm**, yielding a continuous affinity score per phylon.
 
-        The resulting matrix is binarized at **90 %** of the `recommended_threshold`
-        from the original **A_norm** matrix.  The 0.9 multiplier compensates for
-        CD-HIT clustering incongruities when mapping new strains against an
-        existing pangenome.
-        """
-    )
+    The resulting matrix is binarized at **90 %** of the `recommended_threshold`
+    from the original **A_norm** matrix.  The 0.9 multiplier compensates for
+    CD-HIT clustering incongruities when mapping new strains against an
+    existing pangenome.
+    """)
+    return
 
 
 @app.cell
@@ -257,20 +252,18 @@ def _(A_norm, L_norm, P_new_raw, mash_distances):
         )
     else:
         mo.output.replace(mo.md("**Skipped** \u2014 workflow outputs not available."))
-
     return A_new, A_new_binarized
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Affinity Heatmap
+    mo.md("""
+    ## Affinity Heatmap
 
-        Continuous affinity scores (greyscale) for each new strain across all
-        phylons.  Darker cells indicate stronger affinity.
-        """
-    )
+    Continuous affinity scores (greyscale) for each new strain across all
+    phylons.  Darker cells indicate stronger affinity.
+    """)
+    return
 
 
 @app.cell
@@ -289,11 +282,15 @@ def _(A_new, FIG):
         mo.output.replace(fig_hm)
     else:
         mo.output.replace(mo.md("**Skipped** \u2014 no affinity data to visualize."))
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Save Results")
+    mo.md("""
+    ## Save Results
+    """)
+    return
 
 
 @app.cell
@@ -327,6 +324,7 @@ def _(A_new, A_new_binarized, DATA, OUT, n_phylons, strain_mash_clusters):
     mo.output.replace(
         mo.md("### Summary\n\n" + "\n".join(f"- **{r['metric']}**: {r['value']}" for r in summary_rows))
     )
+    return
 
 
 if __name__ == "__main__":

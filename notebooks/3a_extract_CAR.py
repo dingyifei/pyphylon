@@ -24,27 +24,29 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 3a: Core/Accessory/Rare Gene Classification
+    mo.md("""
+    # 3a: Core/Accessory/Rare Gene Classification
 
-        The pangenome is partitioned into three frequency-based categories by
-        fitting a **power-law model** to the gene frequency distribution:
+    The pangenome is partitioned into three frequency-based categories by
+    fitting a **power-law model** to the gene frequency distribution:
 
-        - **Core** genes — present in nearly all genomes (above the upper inflection point)
-        - **Accessory** genes — present at intermediate frequency (between inflection points)
-        - **Rare** genes — present in only a few genomes (below the lower inflection point)
+    - **Core** genes — present in nearly all genomes (above the upper inflection point)
+    - **Accessory** genes — present at intermediate frequency (between inflection points)
+    - **Rare** genes — present in only a few genomes (below the lower inflection point)
 
-        The inflection points are identified automatically by
-        `find_pangenome_segments()`, which fits a piecewise curve to the sorted
-        gene-frequency histogram and minimises residual error.
-        """
-    )
+    The inflection points are identified automatically by
+    `find_pangenome_segments()`, which fits a piecewise curve to the sorted
+    gene-frequency histogram and minimises residual error.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Setup")
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -66,13 +68,15 @@ def _():
     os.makedirs(FIG, exist_ok=True)
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
     os.makedirs(os.path.join(DATA, "processed", "CAR_genomes"), exist_ok=True)
-
-    return CONFIG, DATA, FIG, OUT, SPECIES, TEMP
+    return DATA, FIG, OUT, SPECIES, TEMP
 
 
 @app.cell
 def _():
-    mo.md("## Load Inputs")
+    mo.md("""
+    ## Load Inputs
+    """)
+    return
 
 
 @app.cell
@@ -94,21 +98,20 @@ def _(DATA, SPECIES, TEMP):
             f"- **Metadata:** {metadata.shape[0]} genomes (filtered to P matrix)"
         )
     )
-    return df_genes, metadata
+    return (df_genes,)
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Gene Frequency Distribution
+    mo.md("""
+    ## Gene Frequency Distribution
 
-        A histogram of per-gene frequency (number of genomes each gene appears in)
-        reveals the characteristic U-shaped distribution of bacterial pangenomes:
-        many genes are either very common (core) or very rare, with a smaller
-        accessory fraction in between.
-        """
-    )
+    A histogram of per-gene frequency (number of genomes each gene appears in)
+    reveals the characteristic U-shaped distribution of bacterial pangenomes:
+    many genes are either very common (core) or very rare, with a smaller
+    accessory fraction in between.
+    """)
+    return
 
 
 @app.cell
@@ -126,19 +129,19 @@ def _(FIG, df_genes):
 
     fig_freq.savefig(os.path.join(FIG, "3a_gene_frequency.png"), bbox_inches="tight")
     mo.output.replace(fig_freq)
+    return
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Pangenome Segment Fitting
+    mo.md("""
+    ## Pangenome Segment Fitting
 
-        A piecewise power-law curve is fitted to the sorted gene-frequency
-        distribution. The two inflection points define the **core** and **rare**
-        thresholds; everything in between is classified as **accessory**.
-        """
-    )
+    A piecewise power-law curve is fitted to the sorted gene-frequency
+    distribution. The two inflection points define the **core** and **rare**
+    thresholds; everything in between is classified as **accessory**.
+    """)
+    return
 
 
 @app.cell
@@ -162,7 +165,10 @@ def _(FIG, df_genes):
 
 @app.cell
 def _():
-    mo.md("## Save CAR Classification")
+    mo.md("""
+    ## Save CAR Classification
+    """)
+    return
 
 
 @app.cell
@@ -203,6 +209,7 @@ def _(DATA, OUT, df_genes, segments):
             mo.ui.table(_summary, selection=None),
         ])
     )
+    return
 
 
 if __name__ == "__main__":

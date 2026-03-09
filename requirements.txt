@@ -1,34 +1,5 @@
-# Core scientific stack
-numpy==2.3.5
-pandas==3.0.0
-scipy==1.17.0
-scikit-learn==1.8.0
-biopython==1.86
-tqdm==4.67.3
-
-# Visualization
-matplotlib==3.10.8
-seaborn==0.13.2
-plotly==6.5.2
-kaleido==1.2.0
-
-# ML / analysis
-umap-learn==0.5.11
-# hdbscan installed via conda (needs C compiler for pip build)
-# hdbscan==0.8.41
-prince==0.16.5
-kneebow==1.0.4
-# fastcluster installed via conda (needs C++ compiler for pip build)
-# fastcluster==1.3.0
-wordcloud==1.9.6
-
-# Web scraping
-selenium==4.40.0
-webdriver-manager==4.0.2
-beautifulsoup4==4.14.3
-
-# Config / utilities
-pyyaml==6.0.3
+# Core science + viz (pinned) — in requirements-core.txt
+-r requirements-core.txt
 
 # Marimo notebook framework
 marimo>=0.10.0
@@ -38,8 +9,10 @@ vegafusion[embed]          # server-side Vega charts
 vl-convert-python          # Vega-Lite chart export
 openai                     # AI assistant features
 mcp                        # MCP server connectivity
-python-lsp-server          # Language Server Protocol
-websockets                 # LSP transport
+python-lsp-server>=1.13.0   # Language Server Protocol
+python-lsp-ruff>=2.0.0      # Ruff linting plugin for pylsp
+pylsp-mypy                   # MyPy plugin for pylsp
+websockets                   # LSP transport
 
 # Dev tools
 ruff>=0.9.0

@@ -26,26 +26,28 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 5a: Phylon Characterization
+    mo.md("""
+    # 5a: Phylon Characterization
 
-        Refine the NMF decomposition from step 4a into discrete phylon memberships.
-        The **L matrix** (genes × phylons) is binarized via **3-means clustering** —
-        for each phylon column, K-Means with k=3 is applied and genes in the
-        highest-center cluster are assigned membership. The **A matrix**
-        (phylons × genomes) is binarized with a fixed threshold (≥ 0.5).
+    Refine the NMF decomposition from step 4a into discrete phylon memberships.
+    The **L matrix** (genes × phylons) is binarized via **3-means clustering** —
+    for each phylon column, K-Means with k=3 is applied and genes in the
+    highest-center cluster are assigned membership. The **A matrix**
+    (phylons × genomes) is binarized with a fixed threshold (≥ 0.5).
 
-        Sorted visualizations reveal the block-diagonal structure of gene–phylon
-        and strain–phylon associations, and a linear regression quantifies the
-        relationship between gene frequency and multi-phylon membership.
-        """
-    )
+    Sorted visualizations reveal the block-diagonal structure of gene–phylon
+    and strain–phylon associations, and a linear regression quantifies the
+    relationship between gene frequency and multi-phylon membership.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Setup")
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -66,13 +68,15 @@ def _():
     os.makedirs(FIG, exist_ok=True)
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
     os.makedirs(os.path.join(DATA, "processed", "nmf-outputs"), exist_ok=True)
-
-    return CONFIG, DATA, FIG, OUT, TEMP
+    return DATA, FIG, OUT, TEMP
 
 
 @app.cell
 def _():
-    mo.md("## Load Inputs")
+    mo.md("""
+    ## Load Inputs
+    """)
+    return
 
 
 @app.cell
@@ -103,22 +107,21 @@ def _(DATA, TEMP):
             f"- **Number of phylons:** {n_phylons}"
         )
     )
-    return L_norm, A_norm, df_acc, metadata, n_phylons
+    return A_norm, L_norm, df_acc, n_phylons
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Binarize L Matrix (3-means Clustering)
+    mo.md("""
+    ## Binarize L Matrix (3-means Clustering)
 
-        For each phylon column in L_norm, K-Means with **k=3** is applied.
-        Genes belonging to the cluster with the **highest center** are assigned
-        membership (1), all others are set to 0. Using 3 clusters generally
-        provides a better precision–recall tradeoff than 2-means by separating
-        the high-affinity tail from intermediate and background signal.
-        """
-    )
+    For each phylon column in L_norm, K-Means with **k=3** is applied.
+    Genes belonging to the cluster with the **highest center** are assigned
+    membership (1), all others are set to 0. Using 3 clusters generally
+    provides a better precision–recall tradeoff than 2-means by separating
+    the high-affinity tail from intermediate and background signal.
+    """)
+    return
 
 
 @app.cell
@@ -145,15 +148,14 @@ def _(L_norm):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Binarize A Matrix (Threshold)
+    mo.md("""
+    ## Binarize A Matrix (Threshold)
 
-        The A matrix (phylons × genomes) is binarized with a fixed threshold:
-        strains with affinity **≥ 0.5** are assigned to the phylon. This
-        simple threshold works well when the affinity distribution is bimodal.
-        """
-    )
+    The A matrix (phylons × genomes) is binarized with a fixed threshold:
+    strains with affinity **≥ 0.5** are assigned to the phylon. This
+    simple threshold works well when the affinity distribution is bimodal.
+    """)
+    return
 
 
 @app.cell
@@ -174,32 +176,31 @@ def _(A_norm):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Sorted L_binarized (Gene-Phylon Membership)
+    mo.md("""
+    ## Sorted L_binarized (Gene-Phylon Membership)
 
-        Genes are sorted into three tiers to reveal block-diagonal structure:
+    Genes are sorted into three tiers to reveal block-diagonal structure:
 
-        1. **Zero-phylon genes** — not assigned to any phylon
-        2. **Single-phylon genes** — exclusive to one phylon (highest differentiating
-           power), grouped by phylon in dendrogram order
-        3. **Poly-phylon genes** — shared across multiple phylons, subclustered
-           by Ward's method within each group
+    1. **Zero-phylon genes** — not assigned to any phylon
+    2. **Single-phylon genes** — exclusive to one phylon (highest differentiating
+       power), grouped by phylon in dendrogram order
+    3. **Poly-phylon genes** — shared across multiple phylons, subclustered
+       by Ward's method within each group
 
-        Phylons are ordered by hierarchical clustering dendrogram.
+    Phylons are ordered by hierarchical clustering dendrogram.
 
-        ## Sorted A_binarized (Phylon-Strain Affinity)
+    ## Sorted A_binarized (Phylon-Strain Affinity)
 
-        Strains follow the same three-tier logic:
+    Strains follow the same three-tier logic:
 
-        1. **No-phylon strains** — not affiliated with any phylon
-        2. **Single-phylon strains** — exclusive to one phylon, grouped by phylon
-        3. **Multi-phylon strains** — affiliated with multiple phylons, ordered
-           by primary affiliation
+    1. **No-phylon strains** — not affiliated with any phylon
+    2. **Single-phylon strains** — exclusive to one phylon, grouped by phylon
+    3. **Multi-phylon strains** — affiliated with multiple phylons, ordered
+       by primary affiliation
 
-        Phylons use the same dendrogram order as L_binarized.
-        """
-    )
+    Phylons use the same dendrogram order as L_binarized.
+    """)
+    return
 
 
 @app.cell
@@ -287,16 +288,15 @@ def _(A_binarized, L_binarized):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Gene Frequency vs Phylon Count
+    mo.md("""
+    ## Gene Frequency vs Phylon Count
 
-        Linear regression between how frequently a gene appears across genomes
-        and the number of phylons it belongs to. Higher-frequency (more conserved)
-        genes tend to be active in more phylons, as they are shared across lineages
-        rather than being exclusive to one.
-        """
-    )
+    Linear regression between how frequently a gene appears across genomes
+    and the number of phylons it belongs to. Higher-frequency (more conserved)
+    genes tend to be active in more phylons, as they are shared across lineages
+    rather than being exclusive to one.
+    """)
+    return
 
 
 @app.cell
@@ -362,15 +362,19 @@ def _(A_binarized, FIG, L_binarized, gene_order, phylon_order, strain_order):
     g_A.savefig(os.path.join(FIG, "5a_A_binarized_sorted.png"), bbox_inches="tight")
 
     mo.output.replace(mo.vstack([g_L.fig, g_A.fig]))
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Save Outputs")
+    mo.md("""
+    ## Save Outputs
+    """)
+    return
 
 
 @app.cell
-def _(A_binarized, DATA, L_binarized, L_norm, A_norm, OUT, n_phylons, r2):
+def _(A_binarized, A_norm, DATA, L_binarized, L_norm, OUT, n_phylons, r2):
     """Save normalized and binarized matrices, plus summary CSV."""
     nmf_dir = os.path.join(DATA, "processed", "nmf-outputs")
 
@@ -417,6 +421,7 @@ def _(A_binarized, DATA, L_binarized, L_norm, A_norm, OUT, n_phylons, r2):
             f"- Summary: {n_phylons} phylons, R² = {r2:.4f}"
         )
     )
+    return
 
 
 if __name__ == "__main__":

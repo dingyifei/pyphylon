@@ -18,20 +18,22 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 1a: Filter Genomes for Download
+    mo.md("""
+    # 1a: Filter Genomes for Download
 
-        Select candidate genomes from [BV-BRC](https://www.bv-brc.org/) and
-        quality-filter using N50, contig count, and CheckM completeness /
-        contamination metrics.
-        """
-    )
+    Select candidate genomes from [BV-BRC](https://www.bv-brc.org/) and
+    quality-filter using N50, contig count, and CheckM completeness /
+    contamination metrics.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Setup")
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -84,15 +86,14 @@ def _(SPECIES_NAME, TAXON_ID):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Plot Unfiltered Dataset
+    mo.md("""
+    ## Plot Unfiltered Dataset
 
-        Visualize the unfiltered genome distributions: genome length vs predicted
-        gene count, N50 histogram (with 85% reference threshold), and CheckM
-        completeness / contamination profiles.
-        """
-    )
+    Visualize the unfiltered genome distributions: genome length vs predicted
+    gene count, N50 histogram (with 85% reference threshold), and CheckM
+    completeness / contamination profiles.
+    """)
+    return
 
 
 @app.cell
@@ -147,15 +148,14 @@ def _(FIG, scaffold_n50, species_summary):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Quality Filtering
+    mo.md("""
+    ## Quality Filtering
 
-        Complete genomes are filtered by scaffold N50 (≥ 85% of the reference).
-        WGS genomes are additionally filtered by CheckM contamination (< 5%)
-        and completeness (≥ 92%).
-        """
-    )
+    Complete genomes are filtered by scaffold N50 (≥ 85% of the reference).
+    WGS genomes are additionally filtered by CheckM contamination (< 5%)
+    and completeness (≥ 92%).
+    """)
+    return
 
 
 @app.cell
@@ -193,15 +193,14 @@ def _(DEBUG, genome_df, min_thresh_n50, species_summary):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Filtered Distributions
+    mo.md("""
+    ## Filtered Distributions
 
-        Verify the filtered dataset: genome length vs gene count should form
-        a tight cluster, and GC content vs contig count should show no major
-        outliers.
-        """
-    )
+    Verify the filtered dataset: genome length vs gene count should form
+    a tight cluster, and GC content vs contig count should show no major
+    outliers.
+    """)
+    return
 
 
 @app.cell
@@ -240,7 +239,10 @@ def _(FIG, filtered_species_summary):
 
 @app.cell
 def _():
-    mo.md("## Save Filtered Genomes")
+    mo.md("""
+    ## Save Filtered Genomes
+    """)
+    return
 
 
 @app.cell

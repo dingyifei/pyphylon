@@ -14,20 +14,22 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 2a: Clean Metadata
+    mo.md("""
+    # 2a: Clean Metadata
 
-        De-duplicate genome metadata in preparation for **Mash** filtration
-        and clustering. Duplicate entries sharing the same `biosample_accession`
-        are removed so that each biological sample is represented exactly once.
-        """
-    )
+    De-duplicate genome metadata in preparation for **Mash** filtration
+    and clustering. Duplicate entries sharing the same `biosample_accession`
+    are removed so that each biological sample is represented exactly once.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Setup")
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -43,8 +45,7 @@ def _():
     TEMP = CONFIG["TEMP_DIR"]
 
     os.makedirs(TEMP, exist_ok=True)
-
-    return CONFIG, TEMP
+    return (TEMP,)
 
 
 @app.cell
@@ -71,15 +72,14 @@ def _(TEMP):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## De-duplicate Entries
+    mo.md("""
+    ## De-duplicate Entries
 
-        Ensure `biosample_accession` is unique — drop rows that share the same
-        biosample so downstream analyses are not biased by redundant sequences.
-        The genome summary table is then synced to match.
-        """
-    )
+    Ensure `biosample_accession` is unique — drop rows that share the same
+    biosample so downstream analyses are not biased by redundant sequences.
+    The genome summary table is then synced to match.
+    """)
+    return
 
 
 @app.cell
@@ -103,7 +103,10 @@ def _(input_metadata, input_summary):
 
 @app.cell
 def _():
-    mo.md("## Save Files")
+    mo.md("""
+    ## Save Files
+    """)
+    return
 
 
 @app.cell

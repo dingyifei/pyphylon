@@ -4,9 +4,21 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as readme_file:
     long_description = readme_file.read()
 
-# Read the requirements from the requirements.txt file
-with open("requirements.txt") as f:
-    requirements = f.read().splitlines()
+# Read the requirements from requirements.txt, resolving -r includes
+def _parse_requirements(path):
+    reqs = []
+    with open(path) as f:
+        for line in f:
+            line = line.split("#")[0].strip()
+            if not line:
+                continue
+            if line.startswith("-r "):
+                reqs.extend(_parse_requirements(line[3:].strip()))
+            else:
+                reqs.append(line)
+    return reqs
+
+requirements = _parse_requirements("requirements.txt")
 
 setup(
     name="pyphylon",

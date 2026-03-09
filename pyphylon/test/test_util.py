@@ -156,3 +156,16 @@ def test_remove_empty_files() -> None:
         assert not os.path.exists(empty_file_1)
         assert not os.path.exists(empty_file_2)
         assert os.path.exists(non_empty_file)
+
+
+def test_find_exclusive_genes():
+    from pyphylon.plotting_util import find_exclusive_genes
+    L = pd.DataFrame({
+        "A": [1, 1, 0, 0, 1],
+        "B": [1, 0, 1, 0, 0],
+        "C": [0, 0, 1, 1, 0],
+    }, index=["g1", "g2", "g3", "g4", "g5"])
+    g1_only, g2_only, shared = find_exclusive_genes(L, ["A", "B"], ["C"])
+    assert set(g1_only) == {"g1", "g2", "g5"}
+    assert set(g2_only) == {"g4"}
+    assert set(shared) == {"g3"}

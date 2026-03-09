@@ -1,7 +1,10 @@
 import marimo
 
 __generated_with = "0.20.2"
-app = marimo.App(width="full")
+app = marimo.App(
+    width="full",
+    layout_file="layouts/1b_download_genomes.slides.json",
+)
 
 with app.setup:
     import os
@@ -18,21 +21,23 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 1b: Download Genomes
+    mo.md("""
+    # 1b: Download Genomes
 
-        Download candidate genomes from [BV-BRC](https://www.bv-brc.org/) using
-        the genome list produced by the 1a filtering step. Failed and empty
-        downloads are removed, and metadata is updated to reflect only
-        successfully downloaded genomes.
-        """
-    )
+    Download candidate genomes from [BV-BRC](https://www.bv-brc.org/) using
+    the genome list produced by the 1a filtering step. Failed and empty
+    downloads are removed, and metadata is updated to reflect only
+    successfully downloaded genomes.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Setup")
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -77,15 +82,14 @@ def _(TEMP):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Download
+    mo.md("""
+    ## Download
 
-        Download `.fna` genome files from BV-BRC. Already-downloaded files are
-        skipped automatically. Empty files from failed downloads are cleaned up
-        afterward.
-        """
-    )
+    Download `.fna` genome files from BV-BRC. Already-downloaded files are
+    skipped automatically. Empty files from failed downloads are cleaned up
+    afterward.
+    """)
+    return
 
 
 @app.cell
@@ -119,14 +123,13 @@ def _(RAW_GENOMES):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Update Genome Files
+    mo.md("""
+    ## Update Genome Files
 
-        Remove genomes that failed to download from both the summary and
-        metadata tables, then de-duplicate by `genome_id`.
-        """
-    )
+    Remove genomes that failed to download from both the summary and
+    metadata tables, then de-duplicate by `genome_id`.
+    """)
+    return
 
 
 @app.cell
@@ -160,7 +163,10 @@ def _(bad_genomes, input_metadata, input_summary):
 
 @app.cell
 def _():
-    mo.md("## Save Downloaded Genomes")
+    mo.md("""
+    ## Save Downloaded Genomes
+    """)
+    return
 
 
 @app.cell

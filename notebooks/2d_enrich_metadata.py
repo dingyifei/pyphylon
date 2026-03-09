@@ -14,20 +14,22 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 2d: Enrich Metadata
+    mo.md("""
+    # 2d: Enrich Metadata
 
-        Join MLST (Multi-Locus Sequence Typing) results into the
-        mash-filtered genome metadata. Each genome is mapped to its
-        sequence type; non-exact allele matches are recorded as ST = −1.
-        """
-    )
+    Join MLST (Multi-Locus Sequence Typing) results into the
+    mash-filtered genome metadata. Each genome is mapped to its
+    sequence type; non-exact allele matches are recorded as ST = −1.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Setup")
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -42,13 +44,15 @@ def _():
 
     TEMP = CONFIG["TEMP_DIR"]
     DATA = CONFIG["DATA_DIR"]
-
-    return CONFIG, DATA, TEMP
+    return DATA, TEMP
 
 
 @app.cell
 def _():
-    mo.md("## Load Inputs")
+    mo.md("""
+    ## Load Inputs
+    """)
+    return
 
 
 @app.cell
@@ -92,15 +96,14 @@ def _(DATA, TEMP):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## MLST Sequence Type Distribution
+    mo.md("""
+    ## MLST Sequence Type Distribution
 
-        Enrich metadata by joining MLST sequence types. Each genome is
-        mapped to its ST via the MLST report; dashes (non-exact allele
-        matches) are replaced with −1.
-        """
-    )
+    Enrich metadata by joining MLST sequence types. Each genome is
+    mapped to its ST via the MLST report; dashes (non-exact allele
+    matches) are replaced with −1.
+    """)
+    return
 
 
 @app.cell
@@ -133,7 +136,10 @@ def _(metadata_2b, mlst_df):
 
 @app.cell
 def _():
-    mo.md("## Save Enriched Metadata")
+    mo.md("""
+    ## Save Enriched Metadata
+    """)
+    return
 
 
 @app.cell
@@ -147,6 +153,7 @@ def _(TEMP, enriched_metadata):
             f"Saved `2d_enriched_metadata.csv`: **{enriched_metadata.shape[0]}** genomes, **{enriched_metadata.shape[1]}** columns"
         )
     )
+    return
 
 
 if __name__ == "__main__":

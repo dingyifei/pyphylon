@@ -20,26 +20,28 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 2b: Mash Filtration & Clustering
+    mo.md("""
+    # 2b: Mash Filtration & Clustering
 
-        Pairwise genome similarity is computed using **Mash**, which approximates
-        Average Nucleotide Identity (ANI). Genomes with a Mash distance ≥ 0.05
-        to the reference strains are removed (the 0.05 threshold corresponds to
-        the soft limit for bacterial species delineation).
+    Pairwise genome similarity is computed using **Mash**, which approximates
+    Average Nucleotide Identity (ANI). Genomes with a Mash distance ≥ 0.05
+    to the reference strains are removed (the 0.05 threshold corresponds to
+    the soft limit for bacterial species delineation).
 
-        The surviving genomes are then hierarchically clustered on their
-        Pearson-correlation distance matrix. An elbow-based sensitivity analysis
-        selects the clustering threshold, and small clusters (< 5 members) are
-        iteratively pruned until every cluster is robust.
-        """
-    )
+    The surviving genomes are then hierarchically clustered on their
+    Pearson-correlation distance matrix. An elbow-based sensitivity analysis
+    selects the clustering threshold, and small clusters (< 5 members) are
+    iteratively pruned until every cluster is robust.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Setup")
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -60,8 +62,7 @@ def _():
     os.makedirs(TEMP, exist_ok=True)
     os.makedirs(FIG, exist_ok=True)
     os.makedirs(os.path.join(OUTPUT, "data"), exist_ok=True)
-
-    return CONFIG, FIG, OUTPUT, SMALL_CLUSTER_LIMIT, TEMP
+    return FIG, OUTPUT, SMALL_CLUSTER_LIMIT, TEMP
 
 
 @app.cell
@@ -105,7 +106,10 @@ def _(TEMP):
 
 @app.cell
 def _():
-    mo.md("## Raw Mash Distances")
+    mo.md("""
+    ## Raw Mash Distances
+    """)
+    return
 
 
 @app.cell
@@ -121,19 +125,18 @@ def _(FIG, mash_square_raw):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Distance Distribution
+    mo.md("""
+    ## Distance Distribution
 
-        The Pearson-correlation distance matrix is computed from the raw Mash
-        distance matrix (expensive — cached via `mo.persistent_cache`). Genomes
-        are then filtered in two steps:
+    The Pearson-correlation distance matrix is computed from the raw Mash
+    distance matrix (expensive — cached via `mo.persistent_cache`). Genomes
+    are then filtered in two steps:
 
-        1. Restrict to the scrubbed strains from notebook 2a.
-        2. Remove genomes with Mash distance ≥ 0.05 to reference/representative
-           strains (the species-delineation threshold).
-        """
-    )
+    1. Restrict to the scrubbed strains from notebook 2a.
+    2. Remove genomes with Mash distance ≥ 0.05 to reference/representative
+       strains (the species-delineation threshold).
+    """)
+    return
 
 
 @app.cell
@@ -202,15 +205,14 @@ def _(FIG, input_metadata, mash_square_raw):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Sensitivity Analysis
+    mo.md("""
+    ## Sensitivity Analysis
 
-        The optimal clustering threshold is determined by an elbow analysis on
-        the number-of-clusters vs. threshold curve (complete genomes only).
-        A +0.1 offset is added to the elbow value to avoid over-splitting.
-        """
-    )
+    The optimal clustering threshold is determined by an elbow analysis on
+    the number-of-clusters vs. threshold curve (complete genomes only).
+    A +0.1 offset is added to the elbow value to avoid over-splitting.
+    """)
+    return
 
 
 @app.cell
@@ -259,15 +261,14 @@ def _(FIG, input_summary, mash_corr_dist_filtered, mash_square_filtered):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Initial Clustering
+    mo.md("""
+    ## Initial Clustering
 
-        Hierarchical clustering with the elbow-derived threshold. Small clusters
-        (fewer than the configured `SMALL_CLUSTER_LIMIT` members) are iteratively
-        removed until all remaining clusters are robust.
-        """
-    )
+    Hierarchical clustering with the elbow-derived threshold. Small clusters
+    (fewer than the configured `SMALL_CLUSTER_LIMIT` members) are iteratively
+    removed until all remaining clusters are robust.
+    """)
+    return
 
 
 @app.cell
@@ -328,7 +329,12 @@ def _(FIG, elbow_threshold, mash_corr_dist_complete, mash_square_complete):
 
 
 @app.cell
-def _(SMALL_CLUSTER_LIMIT, elbow_threshold, mash_corr_dist_complete, mash_square_complete):
+def _(
+    SMALL_CLUSTER_LIMIT,
+    elbow_threshold,
+    mash_corr_dist_complete,
+    mash_square_complete,
+):
     """Iteratively remove small clusters until all clusters >= SMALL_CLUSTER_LIMIT."""
     # Work on copies to avoid mutating upstream cell outputs
     iter_square = mash_square_complete.copy()
@@ -383,12 +389,15 @@ def _(SMALL_CLUSTER_LIMIT, elbow_threshold, mash_corr_dist_complete, mash_square
             + f"\n\nMin cluster size: **{min_cluster_size}**"
         )
     )
-    return final_clst, final_link, mash_corr_dist_final, mash_square_final
+    return final_clst, final_link, mash_square_final
 
 
 @app.cell
 def _():
-    mo.md("## Final Clustering")
+    mo.md("""
+    ## Final Clustering
+    """)
+    return
 
 
 @app.cell
@@ -438,7 +447,10 @@ def _(FIG, final_clst, final_link, mash_square_final):
 
 @app.cell
 def _():
-    mo.md("## Summary Statistics")
+    mo.md("""
+    ## Summary Statistics
+    """)
+    return
 
 
 @app.cell
@@ -477,11 +489,21 @@ def _(final_clst, input_metadata, input_summary):
 
 @app.cell
 def _():
-    mo.md("## Save Filtered Genomes")
+    mo.md("""
+    ## Save Filtered Genomes
+    """)
+    return
 
 
 @app.cell
-def _(OUTPUT, TEMP, final_metadata, final_summary, mash_corr_dist_filtered, mash_square_filtered):
+def _(
+    OUTPUT,
+    TEMP,
+    final_metadata,
+    final_summary,
+    mash_corr_dist_filtered,
+    mash_square_filtered,
+):
     """Save all CSV outputs."""
     # Temp outputs (consumed by downstream notebooks)
     final_summary.to_csv(os.path.join(TEMP, "2b_genome_summary.csv"), index=False)

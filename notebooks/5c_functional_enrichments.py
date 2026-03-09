@@ -31,25 +31,27 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 5c: Functional Enrichments
+    mo.md("""
+    # 5c: Functional Enrichments
 
-        GO term enrichment analysis identifies biological functions that are
-        significantly over-represented in each phylon's gene set. For every
-        phylon-GO term pair a **hypergeometric test** compares the observed
-        overlap to the expected overlap under random sampling; results are
-        filtered at **p < 0.05**.
+    GO term enrichment analysis identifies biological functions that are
+    significantly over-represented in each phylon's gene set. For every
+    phylon-GO term pair a **hypergeometric test** compares the observed
+    overlap to the expected overlap under random sampling; results are
+    filtered at **p < 0.05**.
 
-        The generic category *SO:0001217* ("protein-coding gene") is excluded
-        because it carries no discriminating information.
-        """
-    )
+    The generic category *SO:0001217* ("protein-coding gene") is excluded
+    because it carries no discriminating information.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Setup")
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -69,13 +71,15 @@ def _():
 
     os.makedirs(FIG, exist_ok=True)
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
-
-    return CONFIG, DATA, FIG, OUT, SPECIES
+    return DATA, FIG, OUT, SPECIES
 
 
 @app.cell
 def _():
-    mo.md("## Load Inputs")
+    mo.md("""
+    ## Load Inputs
+    """)
+    return
 
 
 @app.cell
@@ -105,15 +109,14 @@ def _(DATA):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Build GO Mapping
+    mo.md("""
+    ## Build GO Mapping
 
-        Each CD-HIT gene cluster is linked to its BAKTA-annotated product
-        description and GO terms via the pangenome-to-locus map. GO terms
-        assigned to fewer than 4 clusters are dropped to reduce noise.
-        """
-    )
+    Each CD-HIT gene cluster is linked to its BAKTA-annotated product
+    description and GO terms via the pangenome-to-locus map. GO terms
+    assigned to fewer than 4 clusters are dropped to reduce noise.
+    """)
+    return
 
 
 @app.cell
@@ -142,7 +145,10 @@ def _(DATA, SPECIES, all_functions):
 
 @app.cell
 def _():
-    mo.md("## Compute Enrichments")
+    mo.md("""
+    ## Compute Enrichments
+    """)
+    return
 
 
 @app.cell
@@ -184,7 +190,10 @@ def _(L_BIN, OUT, cluster_to_go_functions, functions2genes, go_functions):
 
 @app.cell
 def _():
-    mo.md("## Top Enrichments")
+    mo.md("""
+    ## Top Enrichments
+    """)
+    return
 
 
 @app.cell
@@ -196,19 +205,19 @@ def _(phylon_go_enrichments):
         phylon_go_enrichments[available_cols].sort_values("p_value"),
         label="Significant GO enrichments (p < 0.05)",
     )
+    return
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Enrichment Heatmap
+    mo.md("""
+    ## Enrichment Heatmap
 
-        Clustered heatmap of enrichment p-values (phylons x GO terms).
-        Darker colours indicate stronger enrichment (lower p-values);
-        missing values are filled with 0.05 (the significance threshold).
-        """
-    )
+    Clustered heatmap of enrichment p-values (phylons x GO terms).
+    Darker colours indicate stronger enrichment (lower p-values);
+    missing values are filled with 0.05 (the significance threshold).
+    """)
+    return
 
 
 @app.cell
@@ -222,19 +231,19 @@ def _(FIG, phylon_go_enrichments):
     plt.close(g.fig)
 
     mo.output.replace(mo.md("Saved `5c_enrichment_heatmap.png`"))
+    return
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Phylon Wordclouds
+    mo.md("""
+    ## Phylon Wordclouds
 
-        Word clouds of gene product descriptions for each phylon, weighted
-        by phylon contribution. Common uninformative terms (hypothetical,
-        uncharacterised, etc.) are filtered out by `gen_phylon_wordcloud`.
-        """
-    )
+    Word clouds of gene product descriptions for each phylon, weighted
+    by phylon contribution. Common uninformative terms (hypothetical,
+    uncharacterised, etc.) are filtered out by `gen_phylon_wordcloud`.
+    """)
+    return
 
 
 @app.cell
@@ -248,6 +257,7 @@ def _(FIG, L_BIN, functions2genes, phylon_go_enrichments):
         wc_tabs[_phylon] = mo.image(src=wc_path)
 
     mo.ui.tabs(wc_tabs)
+    return
 
 
 @app.cell
@@ -266,6 +276,7 @@ def _(L_BIN, phylon_go_enrichments):
             f"- `5c_wordcloud_phylon*.png` (one per phylon)"
         )
     )
+    return
 
 
 if __name__ == "__main__":

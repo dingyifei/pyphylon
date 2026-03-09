@@ -24,9 +24,9 @@ SMALL_CLUSTER_LIMIT: 5
 
 # --- Bioinformatics Workflow ---
 BAKTA_DB_DIR: "data/db/bakta-light"
-BAKTA_THREADS: 8
-CDHIT_THREADS: 8
-MLST_THREADS: 4
+BAKTA_THREADS: 16
+CDHIT_THREADS: 16
+MLST_THREADS: 16
 
 # --- Container Images (pinned SHAs) ---
 CONTAINER_BAKTA: "docker://oschwengers/bakta@sha256:86036e6a8eb836a3dd2d53e84cc3e63623e56b7f192fac12f8cb5da56859b039"

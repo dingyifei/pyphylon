@@ -20,7 +20,7 @@ services:
     working_dir: /pipeline
     ports:
       - "2718:2718"
-    command: ["marimo", "edit", "--host", "0.0.0.0", "--port", "2718", "--no-token", "notebooks/"]
+    command: ["marimo", "edit", "--host", "0.0.0.0", "--port", "2718", "--no-token", "--watch", "notebooks/"]
 
   marimo-app:
     build:
@@ -31,7 +31,7 @@ services:
     working_dir: /pipeline
     ports:
       - "2719:2719"
-    command: ["marimo", "run", "--host", "0.0.0.0", "--port", "2719", "--no-token", "notebooks/"]
+    command: ["marimo", "run", "--host", "0.0.0.0", "--port", "2719", "--no-token", "--watch", "notebooks/"]
 
 volumes:
   apptainer-cache:

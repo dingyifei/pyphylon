@@ -23,22 +23,24 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 2c: Build CDS Pangenome
+    mo.md("""
+    # 2c: Build CDS Pangenome
 
-        Protein sequences from **BAKTA**-annotated genomes are clustered using
-        **CD-HIT** (80% identity, 80% alignment length) to define gene families
-        and allele variants. The output is a pair of binary presence/absence
-        matrices — one at the gene level, one at the allele level — that form
-        the foundation for all downstream pangenome analyses.
-        """
-    )
+    Protein sequences from **BAKTA**-annotated genomes are clustered using
+    **CD-HIT** (80% identity, 80% alignment length) to define gene families
+    and allele variants. The output is a pair of binary presence/absence
+    matrices — one at the gene level, one at the allele level — that form
+    the foundation for all downstream pangenome analyses.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Setup")
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -59,13 +61,15 @@ def _():
 
     os.makedirs(FIG, exist_ok=True)
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
-
     return CONFIG, DATA, FIG, OUT, SPECIES, TEMP
 
 
 @app.cell
 def _():
-    mo.md("## Load Mash-Filtered Metadata")
+    mo.md("""
+    ## Load Mash-Filtered Metadata
+    """)
+    return
 
 
 @app.cell
@@ -86,15 +90,14 @@ def _(TEMP):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Discover BAKTA Annotations
+    mo.md("""
+    ## Discover BAKTA Annotations
 
-        BAKTA annotates bacterial genomes and produces `.faa` protein FASTA files.
-        We enumerate all annotated genomes, then filter to those that survived
-        the Mash distance filtration in step 2b.
-        """
-    )
+    BAKTA annotates bacterial genomes and produces `.faa` protein FASTA files.
+    We enumerate all annotated genomes, then filter to those that survived
+    the Mash distance filtration in step 2b.
+    """)
+    return
 
 
 @app.cell
@@ -129,16 +132,15 @@ def _(DATA, metadata_2b):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Build CDS Pangenome
+    mo.md("""
+    ## Build CDS Pangenome
 
-        CD-HIT clusters protein sequences at 80% identity and 80% alignment
-        length. Each cluster defines a **gene family**; individual sequences
-        within a cluster are **alleles**. The result is two binary
-        presence/absence matrices (strains x genes, strains x alleles).
-        """
-    )
+    CD-HIT clusters protein sequences at 80% identity and 80% alignment
+    length. Each cluster defines a **gene family**; individual sequences
+    within a cluster are **alleles**. The result is two binary
+    presence/absence matrices (strains x genes, strains x alleles).
+    """)
+    return
 
 
 @app.cell
@@ -190,13 +192,15 @@ def _(CONFIG, DATA, SPECIES, filtered_faa_paths):
                 f"- **Allele matrix:** {df_alleles.shape[0]} alleles x {df_alleles.shape[1]} genomes"
             )
         )
-
     return df_alleles, df_genes
 
 
 @app.cell
 def _():
-    mo.md("## Genes per Genome Distribution")
+    mo.md("""
+    ## Genes per Genome Distribution
+    """)
+    return
 
 
 @app.cell
@@ -218,11 +222,15 @@ def _(FIG, df_genes):
 
         fig.savefig(os.path.join(FIG, "2c_genes_per_genome.png"), bbox_inches="tight")
         mo.output.replace(fig)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Save Pangenome Summary")
+    mo.md("""
+    ## Save Pangenome Summary
+    """)
+    return
 
 
 @app.cell
@@ -264,6 +272,7 @@ def _(OUT, df_alleles, df_genes):
                 "|--------|-------|\n" + "\n".join(f"| {row.metric} | {row.value} |" for row in _summary.itertuples())
             )
         )
+    return
 
 
 if __name__ == "__main__":

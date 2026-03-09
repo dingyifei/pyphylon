@@ -76,35 +76,33 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 4a: NMF Decomposition — Phylon Identification
+    mo.md("""
+    # 4a: NMF Decomposition — Phylon Identification
 
-        Non-negative Matrix Factorization (NMF) decomposes the accessory genome
-        presence/absence matrix **P** into two lower-rank matrices **L** (genomes × phylons)
-        and **A** (phylons × genes), identifying co-occurring gene sets (phylons).
+    Non-negative Matrix Factorization (NMF) decomposes the accessory genome
+    presence/absence matrix **P** into two lower-rank matrices **L** (genomes × phylons)
+    and **A** (phylons × genes), identifying co-occurring gene sets (phylons).
 
-        **Workflow:**
+    **Workflow:**
 
-        1. **MCA rank selection** — Multiple Correspondence Analysis identifies candidate
-           ranks by explained-variance thresholds (70–90 %).
-        2. **NMF screening** — Initial decomposition at MCA-derived ranks, then refinement
-           around the best AIC rank.
-        3. **Submatrix NMF** — Repeat decomposition on gene-frequency submatrices (e.g.
-           0–25 %, 25–50 %, …) to assess robustness.
-        4. **Consensus clustering** — Average connectivity matrices across submatrices and
-           cluster with Ward's method; cophenetic correlation measures cluster stability.
-        """
-    )
+    1. **MCA rank selection** — Multiple Correspondence Analysis identifies candidate
+       ranks by explained-variance thresholds (70–90 %).
+    2. **NMF screening** — Initial decomposition at MCA-derived ranks, then refinement
+       around the best AIC rank.
+    3. **Submatrix NMF** — Repeat decomposition on gene-frequency submatrices (e.g.
+       0–25 %, 25–50 %, …) to assess robustness.
+    4. **Consensus clustering** — Average connectivity matrices across submatrices and
+       cluster with Ward's method; cophenetic correlation measures cluster stability.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Setup
-        """
-    )
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -127,8 +125,7 @@ def _():
     os.makedirs(FIG, exist_ok=True)
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
     os.makedirs(os.path.join(DATA, "processed", "nmf-outputs"), exist_ok=True)
-
-    return CONFIG, DATA, FIG, MASH_RANK, OUT, SPECIES, TEMP
+    return DATA, FIG, MASH_RANK, OUT, TEMP
 
 
 @app.cell
@@ -152,7 +149,7 @@ def _(DATA, TEMP):
             f"- **Metadata:** {metadata.shape[0]} genomes"
         )
     )
-    return df_acc, P_submatrices, metadata
+    return P_submatrices, df_acc
 
 
 @app.cell
@@ -189,16 +186,15 @@ def _(MASH_RANK, df_acc):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## MCA Cumulative Variance
+    mo.md("""
+    ## MCA Cumulative Variance
 
-        MCA captures the dominant axes of variation in the binary presence/absence
-        matrix. Vertical lines mark the number of components needed to explain
-        70 %, 75 %, 80 %, 85 %, and 90 % of the total variance — these become
-        candidate ranks for NMF.
-        """
-    )
+    MCA captures the dominant axes of variation in the binary presence/absence
+    matrix. Vertical lines mark the number of components needed to explain
+    70 %, 75 %, 80 %, 85 %, and 90 % of the total variance — these become
+    candidate ranks for NMF.
+    """)
+    return
 
 
 @app.cell
@@ -233,24 +229,24 @@ def _(FIG, cumulative_variance, threshold):
 
     fig_mca.savefig(os.path.join(FIG, "4a_mca_variance.png"), bbox_inches="tight")
     mo.output.replace(fig_mca)
+    return
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## NMF Decomposition
+    mo.md("""
+    ## NMF Decomposition
 
-        NMF is run in two phases:
+    NMF is run in two phases:
 
-        1. **Initial screening** across MCA-derived ranks to find the best AIC.
-        2. **Refinement** — re-run with additional ranks near the best AIC model.
+    1. **Initial screening** across MCA-derived ranks to find the best AIC.
+    2. **Refinement** — re-run with additional ranks near the best AIC model.
 
-        The same procedure is then repeated on each gene-frequency submatrix
-        (e.g. 0–25 %, 25–50 %) to collect per-submatrix best models for
-        consensus clustering.
-        """
-    )
+    The same procedure is then repeated on each gene-frequency submatrix
+    (e.g. 0–25 %, 25–50 %) to collect per-submatrix best models for
+    consensus clustering.
+    """)
+    return
 
 
 @app.cell
@@ -289,11 +285,26 @@ def _(df_acc, rank_list):
             + _metrics_rows
         )
     )
-    return A_norm_dict, A_binarized_dict, L_norm_dict, L_binarized_dict, df_metrics, extra_ranks
+    return (
+        A_binarized_dict,
+        A_norm_dict,
+        L_binarized_dict,
+        L_norm_dict,
+        df_metrics,
+        extra_ranks,
+    )
 
 
 @app.cell
-def _(A_binarized_dict, A_norm_dict, L_binarized_dict, L_norm_dict, P_submatrices, df_acc, df_metrics, extra_ranks):
+def _(
+    A_binarized_dict,
+    A_norm_dict,
+    L_binarized_dict,
+    L_norm_dict,
+    P_submatrices,
+    df_metrics,
+    extra_ranks,
+):
     """Submatrix NMF decomposition + best model extraction (cached — ~10-15 hrs)."""
     with mo.persistent_cache("4a_nmf_submatrix"):
         # Initialize with best full-genome model
@@ -338,21 +349,26 @@ def _(A_binarized_dict, A_norm_dict, L_binarized_dict, L_norm_dict, P_submatrice
             + "\n".join(f"- **{k}**: rank {v}" for k, v in sorted(best_ranks_dict.items(), key=str))
         )
     )
-    return best_ranks_dict, best_L_norm_dict, best_A_norm_dict, best_L_binarized_dict, best_A_binarized_dict
+    return (
+        best_A_binarized_dict,
+        best_A_norm_dict,
+        best_L_binarized_dict,
+        best_L_norm_dict,
+        best_ranks_dict,
+    )
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Consensus Matrix
+    mo.md("""
+    ## Consensus Matrix
 
-        Connectivity matrices from each submatrix decomposition are averaged to
-        build a consensus matrix. Ward's-method clustering is applied, and the
-        cophenetic correlation coefficient measures how faithfully the dendrogram
-        preserves pairwise distances (ideally ≥ 0.7).
-        """
-    )
+    Connectivity matrices from each submatrix decomposition are averaged to
+    build a consensus matrix. Ward's-method clustering is applied, and the
+    cophenetic correlation coefficient measures how faithfully the dendrogram
+    preserves pairwise distances (ideally ≥ 0.7).
+    """)
+    return
 
 
 @app.cell
@@ -376,33 +392,40 @@ def _(P_submatrices, best_A_binarized_dict, df_acc):
         )
     )
     return (
-        df_consensus,
         consensus_clst,
-        link,
-        coph_cor,
-        df_consensus_filt,
         consensus_clst_filt,
-        link_filt,
+        coph_cor,
         coph_cor_filt,
+        df_consensus,
+        df_consensus_filt,
+        link,
+        link_filt,
     )
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Consensus Matrix (Filtered)
+    mo.md("""
+    ## Consensus Matrix (Filtered)
 
-        The filtered consensus excludes the (50–100 %) and (75–100 %)
-        submatrices, which overlap heavily with core genes and can dilute
-        the accessory-genome signal. Both full and filtered clustermaps are
-        plotted below.
-        """
-    )
+    The filtered consensus excludes the (50–100 %) and (75–100 %)
+    submatrices, which overlap heavily with core genes and can dilute
+    the accessory-genome signal. Both full and filtered clustermaps are
+    plotted below.
+    """)
+    return
 
 
 @app.cell
-def _(FIG, consensus_clst, consensus_clst_filt, df_consensus, df_consensus_filt, link, link_filt):
+def _(
+    FIG,
+    consensus_clst,
+    consensus_clst_filt,
+    df_consensus,
+    df_consensus_filt,
+    link,
+    link_filt,
+):
     """Plot consensus clustermaps and cluster size bar charts."""
     # --- Clustermap: Full consensus ---
     g_full = sns.clustermap(
@@ -449,37 +472,37 @@ def _(FIG, consensus_clst, consensus_clst_filt, df_consensus, df_consensus_filt,
     fig_bars.savefig(os.path.join(FIG, "4a_consensus_cluster_sizes.png"), bbox_inches="tight")
 
     mo.output.replace(mo.vstack([g_full.fig, g_filt.fig, fig_bars]))
+    return
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## NMF Output Shapes
+    mo.md("""
+    ## NMF Output Shapes
 
-        Final matrices saved for downstream analysis:
+    Final matrices saved for downstream analysis:
 
-        - **L** (genomes × phylons): phylon membership weights per genome
-        - **A** (phylons × genes): gene contribution weights per phylon
-        - **L_binarized / A_binarized**: thresholded binary assignments
-        - **Consensus clusters**: Ward-clustered genome groups from filtered consensus
-        """
-    )
+    - **L** (genomes × phylons): phylon membership weights per genome
+    - **A** (phylons × genes): gene contribution weights per phylon
+    - **L_binarized / A_binarized**: thresholded binary assignments
+    - **Consensus clusters**: Ward-clustered genome groups from filtered consensus
+    """)
+    return
 
 
 @app.cell
 def _(
     DATA,
     OUT,
-    best_L_binarized_dict,
-    best_L_norm_dict,
     best_A_binarized_dict,
     best_A_norm_dict,
+    best_L_binarized_dict,
+    best_L_norm_dict,
     best_ranks_dict,
-    coph_cor,
-    coph_cor_filt,
     consensus_clst,
     consensus_clst_filt,
+    coph_cor,
+    coph_cor_filt,
     df_metrics,
 ):
     """Save NMF outputs, consensus clusters, and summary CSV."""
@@ -536,6 +559,7 @@ def _(
             mo.ui.table(_summary),
         ])
     )
+    return
 
 
 if __name__ == "__main__":

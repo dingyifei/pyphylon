@@ -38,6 +38,8 @@ dependencies:
     - vl-convert-python
     - openai
     - mcp
-    - python-lsp-server
+    - python-lsp-server>=1.13.0
+    - python-lsp-ruff>=2.0.0
+    - pylsp-mypy
     - websockets
     - ruff>=0.9.0

@@ -40,24 +40,26 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 5d: Gene Alignment Visualization
+    mo.md("""
+    # 5d: Gene Alignment Visualization
 
-        Align genes across Complete genomes using **anchor genes** — genes appearing
-        exactly once in every strain. Strains are grouped by gene order consistency,
-        reversed if needed, and rotated to start at gene 1. This standardized ordering
-        enables circular genome visualization of phylon-specific gene locations.
+    Align genes across Complete genomes using **anchor genes** — genes appearing
+    exactly once in every strain. Strains are grouped by gene order consistency,
+    reversed if needed, and rotated to start at gene 1. This standardized ordering
+    enables circular genome visualization of phylon-specific gene locations.
 
-        **Pipeline:** Parse GFF annotations → identify anchor genes → standardize gene
-        order → classify genetic variation → generate circular genome plots per phylon.
-        """
-    )
+    **Pipeline:** Parse GFF annotations → identify anchor genes → standardize gene
+    order → classify genetic variation → generate circular genome plots per phylon.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Setup")
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -78,20 +80,18 @@ def _():
 
     os.makedirs(FIG, exist_ok=True)
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
-
-    return CONFIG, DATA, FIG, OUT, SPECIES, TEMP
+    return DATA, FIG, OUT, SPECIES, TEMP
 
 
 @app.cell
 def _():
-    mo.md(
-        r"""
-        ## Load Inputs
+    mo.md(r"""
+    ## Load Inputs
 
-        Load the P matrix, enriched metadata (filtered to Complete genomes), L/A
-        binarized matrices, and the pangenome cluster → locus\_tag mapping.
-        """
-    )
+    Load the P matrix, enriched metadata (filtered to Complete genomes), L/A
+    binarized matrices, and the pangenome cluster → locus\_tag mapping.
+    """)
+    return
 
 
 @app.cell
@@ -130,20 +130,25 @@ def _(DATA, SPECIES, TEMP):
             f"- **pg2locus_map:** {len(pg2locus_map)} mappings"
         )
     )
-    return A_binarized, L_binarized_clean, REFERENCE_STRAIN, metadata_complete, pg2locus_map
+    return (
+        A_binarized,
+        L_binarized_clean,
+        REFERENCE_STRAIN,
+        metadata_complete,
+        pg2locus_map,
+    )
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Parse GFF Files
+    mo.md("""
+    ## Parse GFF Files
 
-        Parse BAKTA GFF3 annotations for each Complete genome. For each strain, merge
-        gene positions with pangenome cluster IDs and keep only the main chromosome
-        (largest accession). The result is an ordered gene vector per strain.
-        """
-    )
+    Parse BAKTA GFF3 annotations for each Complete genome. For each strain, merge
+    gene positions with pangenome cluster IDs and keep only the main chromosome
+    (largest accession). The result is an ordered gene vector per strain.
+    """)
+    return
 
 
 @app.cell
@@ -172,16 +177,15 @@ def _(DATA, metadata_complete, pg2locus_map):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Gene Order Standardization
+    mo.md("""
+    ## Gene Order Standardization
 
-        Identify anchor genes (single-copy genes shared by all strains), group strains
-        by consistent gene ordering, establish a canonical reference order from the
-        largest group, then renumber, reverse, and rotate each strain's gene vector
-        so they all start at gene 1.
-        """
-    )
+    Identify anchor genes (single-copy genes shared by all strains), group strains
+    by consistent gene ordering, establish a canonical reference order from the
+    largest group, then renumber, reverse, and rotate each strain's gene vector
+    so they all start at gene 1.
+    """)
+    return
 
 
 @app.cell
@@ -231,20 +235,19 @@ def _(REFERENCE_STRAIN, strain_vectors):
             f"- **Strictly ordered:** {total_true} | Other orders: {total_false}"
         )
     )
-    return once_genes, strain_vectors_final
+    return (strain_vectors_final,)
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Genetic Variation
+    mo.md("""
+    ## Genetic Variation
 
-        Assign descriptive names to non-anchor genes based on their flanking anchor
-        positions, count genes between each anchor pair, and classify each strain's
-        structural variation type: no variation, inversion, translocation, or other.
-        """
-    )
+    Assign descriptive names to non-anchor genes based on their flanking anchor
+    positions, count genes between each anchor pair, and classify each strain's
+    structural variation type: no variation, inversion, translocation, or other.
+    """)
+    return
 
 
 @app.cell
@@ -268,18 +271,17 @@ def _(strain_vectors_final):
             f"- **Variation types:**\n" + "\n".join(f"  - {vtype}: {count}" for vtype, count in var_counts.items())
         )
     )
-    return gene_mapping_to_anchor_genes, variation_df
+    return (variation_df,)
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Gene Length Distribution
+    mo.md("""
+    ## Gene Length Distribution
 
-        Histogram of gene counts per Complete genome after GFF parsing.
-        """
-    )
+    Histogram of gene counts per Complete genome after GFF parsing.
+    """)
+    return
 
 
 @app.cell
@@ -298,19 +300,19 @@ def _(FIG, strain_vectors):
     plt.close(fig_hist)
 
     mo.output.replace(mo.md(f"Saved `5d_gene_length_distribution.png` ({len(gene_lengths)} strains)"))
+    return
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Circular Genome Plots
+    mo.md("""
+    ## Circular Genome Plots
 
-        Circular plots show gene positions for each phylon. Orange/coral segments
-        indicate phylon-specific genes; blue segments indicate anchor genes (conserved
-        single-copy genes used for ordering).
-        """
-    )
+    Circular plots show gene positions for each phylon. Orange/coral segments
+    indicate phylon-specific genes; blue segments indicate anchor genes (conserved
+    single-copy genes used for ordering).
+    """)
+    return
 
 
 @app.cell
@@ -358,13 +360,12 @@ def _(A_binarized, FIG, L_binarized_clean, strain_vectors_final):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Unique Genes by Phylon
+    mo.md("""
+    ## Unique Genes by Phylon
 
-        Genes that belong exclusively to a single phylon (not shared with any other).
-        """
-    )
+    Genes that belong exclusively to a single phylon (not shared with any other).
+    """)
+    return
 
 
 @app.cell
@@ -375,11 +376,15 @@ def _(unique_genes_dict):
         for p, genes in sorted(unique_genes_dict.items(), key=lambda x: len(x[1]), reverse=True)
     ]
     mo.output.replace(mo.ui.table(pd.DataFrame(_rows), label="Unique gene counts by phylon"))
+    return
 
 
 @app.cell
 def _():
-    mo.md("## Save Results")
+    mo.md("""
+    ## Save Results
+    """)
+    return
 
 
 @app.cell
@@ -441,6 +446,7 @@ def _(OUT, strain_vectors_final, unique_genes_dict, variation_df):
             f"- `5d_unique_genes_by_phylon.csv`"
         )
     )
+    return
 
 
 if __name__ == "__main__":

@@ -223,6 +223,7 @@ rule nb_5b:
     output:
         f"{FIG}/5b_clustermap.png",
         f"{FIG}/5b_phylon_dendrogram.png",
+        f"{FIG}/5b_first_split_heatmap.png",
         f"{OUT}/data/5b_gene_diff_stats.csv",
     shell:
         "python notebooks/5b_gene_diff.py -- --config {input.config}"

@@ -22,31 +22,29 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        """
-        # 5e: BLAST Enrichment Analysis
+    mo.md("""
+    # 5e: BLAST Enrichment Analysis
 
-        Compare pangenome representative sequences against external databases
-        to identify functionally relevant genes. This notebook:
+    Compare pangenome representative sequences against external databases
+    to identify functionally relevant genes. This notebook:
 
-        1. **Extracts representative alleles** — one protein and one DNA sequence
-           per CD-HIT gene cluster
-        2. **Searches VFDB** — BLASTs representative proteins against the
-           [Virulence Factor Database](https://www.mgc.ac.cn/VFs/download.htm)
-           (e-value < 1e-5, identity > 80%)
-        3. **Builds a pangenome BLAST DB** — enables custom blastp queries
-           against the full pangenome
-        """
-    )
+    1. **Extracts representative alleles** — one protein and one DNA sequence
+       per CD-HIT gene cluster
+    2. **Searches VFDB** — BLASTs representative proteins against the
+       [Virulence Factor Database](https://www.mgc.ac.cn/VFs/download.htm)
+       (e-value < 1e-5, identity > 80%)
+    3. **Builds a pangenome BLAST DB** — enables custom blastp queries
+       against the full pangenome
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Setup
-        """
-    )
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -67,21 +65,19 @@ def _():
 
     os.makedirs(FIG, exist_ok=True)
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
-
-    return CONFIG, DATA, FIG, OUT, SPECIES, TEMP
+    return DATA, OUT, SPECIES
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Extract Representative Sequences
+    mo.md("""
+    ## Extract Representative Sequences
 
-        Extract one representative protein and one DNA sequence per CD-HIT gene
-        cluster. These are the longest member of each cluster and serve as the
-        query set for downstream BLAST searches.
-        """
-    )
+    Extract one representative protein and one DNA sequence per CD-HIT gene
+    cluster. These are the longest member of each cluster and serve as the
+    query set for downstream BLAST searches.
+    """)
+    return
 
 
 @app.cell
@@ -99,25 +95,23 @@ def _(DATA, SPECIES):
 
     if not os.path.exists(dna_seqs):
         extract_reference_dna_sequences(DATA, SPECIES, dna_seqs)
-
     return dna_seqs, prot_seqs
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## VFDB Enrichment Results
+    mo.md("""
+    ## VFDB Enrichment Results
 
-        Pangenome representative protein sequences are searched against
-        [VFDB](https://www.mgc.ac.cn/VFs/download.htm) (Virulence Factor
-        Database) using blastp with e-value < 1e-5 and identity > 80%.
+    Pangenome representative protein sequences are searched against
+    [VFDB](https://www.mgc.ac.cn/VFs/download.htm) (Virulence Factor
+    Database) using blastp with e-value < 1e-5 and identity > 80%.
 
-        > **Prerequisite:** Download `VFDB_setA_pro.fas` from
-        > <https://www.mgc.ac.cn/VFs/download.htm> and place it in
-        > `data/external/VFDB/`.
-        """
-    )
+    > **Prerequisite:** Download `VFDB_setA_pro.fas` from
+    > <https://www.mgc.ac.cn/VFs/download.htm> and place it in
+    > `data/external/VFDB/`.
+    """)
+    return
 
 
 @app.cell
@@ -156,31 +150,29 @@ def _(DATA, prot_seqs):
                 f"`VFDB_setA_pro.fas` in `{os.path.dirname(vfdb_fasta)}/`."
             )
         )
-
     return (vfdb_results,)
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Custom Queries
+    mo.md("""
+    ## Custom Queries
 
-        A pangenome BLAST database is built from the CD-HIT representative
-        sequences. Once created, you can search any protein of interest
-        against the full pangenome from the command line:
+    A pangenome BLAST database is built from the CD-HIT representative
+    sequences. Once created, you can search any protein of interest
+    against the full pangenome from the command line:
 
-        ```bash
-        blastp -query your_query.fa \\
-               -db data/external/PangenomeDB/PangenomeDB \\
-               -outfmt 6 -evalue 1e-5
-        ```
+    ```bash
+    blastp -query your_query.fa \
+           -db data/external/PangenomeDB/PangenomeDB \
+           -outfmt 6 -evalue 1e-5
+    ```
 
-        Example query sequences can be obtained from
-        [UniProt](https://www.uniprot.org/) or
-        [NCBI Protein](https://www.ncbi.nlm.nih.gov/protein/).
-        """
-    )
+    Example query sequences can be obtained from
+    [UniProt](https://www.uniprot.org/) or
+    [NCBI Protein](https://www.ncbi.nlm.nih.gov/protein/).
+    """)
+    return
 
 
 @app.cell
@@ -198,17 +190,15 @@ def _(DATA, SPECIES):
             mo.output.replace(mo.md(f"Pangenome BLAST DB already exists at `{pangenome_db}`"))
     else:
         mo.output.replace(mo.md(f"Pangenome FASTA not found at `{pangenome_input}`, skipping DB creation"))
-
     return (pangenome_db,)
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Save Results
-        """
-    )
+    mo.md("""
+    ## Save Results
+    """)
+    return
 
 
 @app.cell
@@ -235,6 +225,7 @@ def _(OUT, dna_seqs, pangenome_db, prot_seqs, vfdb_results):
             + f"\n\nSaved to `{os.path.join(OUT, 'data/5e_blast_summary.csv')}`"
         )
     )
+    return
 
 
 if __name__ == "__main__":

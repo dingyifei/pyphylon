@@ -824,6 +824,36 @@ def unique_genes_by_phylon(df: pd.DataFrame) -> dict:
     return unique_genes
 
 
+def find_exclusive_genes(L_binarized, phylon_list1, phylon_list2):
+    """Find genes exclusive to each of two phylon groups.
+
+    Unlike get_gene_sets (which compares a cluster vs ALL other phylons),
+    this compares two specific groups -- useful for analyzing what
+    distinguishes the two branches of a dendrogram split.
+
+    Parameters
+    ----------
+    L_binarized : pd.DataFrame
+        Gene x phylon binary matrix.
+    phylon_list1, phylon_list2 : list[str]
+        Phylon column names for each group.
+
+    Returns
+    -------
+    group1_only : pd.Index  –  genes in group1, absent from group2
+    group2_only : pd.Index  –  genes in group2, absent from group1
+    shared      : pd.Index  –  genes present in both groups
+    """
+    in_g1 = L_binarized[phylon_list1].sum(axis=1) > 0
+    in_g2 = L_binarized[phylon_list2].sum(axis=1) > 0
+
+    group1_only = L_binarized.index[in_g1 & ~in_g2]
+    group2_only = L_binarized.index[in_g2 & ~in_g1]
+    shared = L_binarized.index[in_g1 & in_g2]
+
+    return group1_only, group2_only, shared
+
+
 def generate_dendrogram_and_split(X: pd.DataFrame, linkage_method = "ward", linkage_metric='euclidean') -> tuple:
     '''
     This function generates a linkage matrix based on hierarchical clustering and returns the membership

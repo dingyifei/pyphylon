@@ -25,33 +25,31 @@ with app.setup:
 
 @app.cell
 def _():
-    mo.md(
-        r"""
-        # 3b: Heaps' Law — Pangenome Growth Analysis
+    mo.md(r"""
+    # 3b: Heaps' Law — Pangenome Growth Analysis
 
-        Heaps' law models pangenome growth as genomes are accumulated:
+    Heaps' law models pangenome growth as genomes are accumulated:
 
-        $$G(n) = \kappa \cdot n^\gamma$$
+    $$G(n) = \kappa \cdot n^\gamma$$
 
-        where $\kappa$ is a scaling constant and $\gamma$ (gamma/lambda) controls
-        the growth rate. A **gamma < 1** indicates an **open pangenome** — new
-        genes continue to appear as more genomes are added, suggesting the
-        species has access to a large and diverse gene pool.
+    where $\kappa$ is a scaling constant and $\gamma$ (gamma/lambda) controls
+    the growth rate. A **gamma < 1** indicates an **open pangenome** — new
+    genes continue to appear as more genomes are added, suggesting the
+    species has access to a large and diverse gene pool.
 
-        This notebook estimates pan, core, accessory, and rare genome size
-        curves by random genome accumulation, then fits Heaps' law to each
-        segment to produce a stacked growth plot.
-        """
-    )
+    This notebook estimates pan, core, accessory, and rare genome size
+    curves by random genome accumulation, then fits Heaps' law to each
+    segment to produce a stacked growth plot.
+    """)
+    return
 
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Setup
-        """
-    )
+    mo.md("""
+    ## Setup
+    """)
+    return
 
 
 @app.cell
@@ -72,8 +70,7 @@ def _():
 
     os.makedirs(FIG, exist_ok=True)
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
-
-    return CONFIG, DATA, FIG, OUT, SPECIES, TEMP
+    return DATA, FIG, OUT, SPECIES, TEMP
 
 
 @app.cell
@@ -95,7 +92,7 @@ def _(DATA, SPECIES, TEMP):
             f"- **Metadata:** {metadata.shape[0]} genomes (filtered to P matrix)"
         )
     )
-    return df_genes, metadata
+    return (df_genes,)
 
 
 @app.cell
@@ -168,16 +165,15 @@ def _(OUT, df_genes, df_pan_core):
 
 @app.cell
 def _():
-    mo.md(
-        """
-        ## Heaps' Law Stacked Plot
+    mo.md("""
+    ## Heaps' Law Stacked Plot
 
-        The stacked area plot below shows fitted growth curves for the core,
-        accessory, and rare genome segments on a log-linear scale. The total
-        height at any point represents the predicted pangenome size for that
-        number of genomes.
-        """
-    )
+    The stacked area plot below shows fitted growth curves for the core,
+    accessory, and rare genome segments on a log-linear scale. The total
+    height at any point represents the predicted pangenome size for that
+    number of genomes.
+    """)
+    return
 
 
 @app.cell
@@ -200,6 +196,7 @@ def _(FIG, df_genes, output_acc, output_core, output_rare):
 
     fig_heaps.savefig(os.path.join(FIG, "3b_heaps_law.png"), bbox_inches="tight")
     mo.output.replace(fig_heaps)
+    return
 
 
 if __name__ == "__main__":
