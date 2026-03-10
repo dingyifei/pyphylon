@@ -19,10 +19,10 @@ rule anno_get_db:
     container:
         config["CONTAINER_BAKTA"]
     shell:
-        "wget https://zenodo.org/record/10522951/files/db-light.tar.gz "
-        "&& tar -xzf db-light.tar.gz "
-        "&& mv db-light {output} "
-        "&& rm db-light.tar.gz "
+        "wget -O {TEMP}/db-light.tar.gz https://zenodo.org/record/10522951/files/db-light.tar.gz "
+        "&& tar -xzf {TEMP}/db-light.tar.gz -C {TEMP} "
+        "&& mv {TEMP}/db-light {output} "
+        "&& rm {TEMP}/db-light.tar.gz "
         "&& amrfinder_update --force_update --database {output}/amrfinderplus-db"
 
 
