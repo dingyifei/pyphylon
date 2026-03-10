@@ -168,12 +168,9 @@ examples/deprecated/*
 output/
 temp/
 
-# Downloaded paper PDFs
-papers/*.pdf
-
 workflow/.snakemake/*
 
 examples/config.py
 /.idea
-papers/_download_report.json
+/.vscode
 .claude/settings.local.json
