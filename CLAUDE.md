@@ -10,19 +10,19 @@ Pyphylon is a Python bioinformatics package for analyzing and visualizing co-occ
 
 ### Pipeline Modes
 
-The pipeline supports two execution modes. The Snakefile's `container:` directives are ignored when `--sdm apptainer` is not passed, so the same workflow works in both modes.
+The pipeline uses Snakemake's per-rule `conda:` directives to isolate conflicting bio tools (bakta, mash, cd-hit, mlst) into separate conda environments under `workflow/envs/`. The main env (`pyphylon-marimo`) contains only the Python analysis stack plus blast. Both native and Docker modes use `--sdm conda`.
 
-**Conda native** (macOS ARM / Linux) — all bio tools installed via conda, no Docker needed:
+**Conda native** (x64 Linux):
 ```bash
 conda env update -f conda/environment-marimo.yml
 conda activate pyphylon-marimo
-snakemake --cores 8 --resources jupyter_kernel=1
+snakemake --sdm conda --cores 8 --resources jupyter_kernel=1
 ```
 
-**Docker** (amd64 platforms / CI) — containerized bio tools via Apptainer:
+**Docker** (x64 Linux / CI):
 ```bash
 docker compose build
-docker compose run --rm pipeline snakemake --cores 8 --sdm apptainer
+docker compose run --rm pipeline snakemake --sdm conda --cores 8
 ```
 
 ### Environment Setup (macOS)
@@ -84,10 +84,10 @@ Uses `docker-compose.yml` with OrbStack (macOS) or Docker Desktop. The entire re
 docker compose build
 
 # Full pipeline (notebooks + bio workflows)
-docker compose run pipeline snakemake --cores 4 --sdm apptainer
+docker compose run pipeline snakemake --sdm conda --cores 4
 
 # Bio workflow only
-docker compose run pipeline snakemake pangenome_mash --cores 4 --sdm apptainer
+docker compose run pipeline snakemake pangenome_mash --sdm conda --cores 4
 
 # Single notebook rule
 docker compose run pipeline snakemake nb_1a --cores 4
@@ -148,7 +148,7 @@ TAXON_ID: 197
 DATA_DIR: "data/"
 TEMP_DIR: "temp/"
 OUTPUT_DIR: "output/"
-BAKTA_DB_DIR: "temp/db-light"
+BAKTA_DB_TYPE: "light"        # "light" or "full" (BAKTA_DB_DIR derived automatically)
 BAKTA_THREADS: 8
 CDHIT_THREADS: 8
 MLST_THREADS: 4
@@ -207,10 +207,12 @@ output/
 - Use pytest framework with modular test files
 
 ### External Tool Dependencies
-- **BAKTA**: Genome annotation (containerized)
-- **MLST**: Multi-locus sequence typing (containerized)
-- **CD-HIT**: Sequence clustering for pangenome construction
-- **Mash**: Fast genome distance estimation (containerized via staphb/mashtree)
+Each bio tool runs in its own Snakemake-managed conda env (`workflow/envs/`):
+- **BAKTA + AMRFinderPlus**: Genome annotation (`workflow/envs/bakta.yml`)
+- **MLST**: Multi-locus sequence typing (`workflow/envs/mlst.yml`)
+- **CD-HIT**: Sequence clustering for pangenome construction (`workflow/envs/cdhit.yml`)
+- **Mash**: Fast genome distance estimation (`workflow/envs/mash.yml`)
+- **BLAST**: Sequence search (in main env, used by nb_5e)
 
 ### Serialization and I/O
 - Primary serialization uses joblib for large matrix objects
