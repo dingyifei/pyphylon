@@ -1,0 +1,70 @@
+# eggNOG-mapper and COGclassifier workflow
+# Included by the master Snakefile — expects DATA, TEMP, SPECIES, config variables
+#
+# Rules: eggnog_download_db, eggnog_annotate, cogclassifier_run
+# Target: pangenome_eggnog (runs both tools)
+
+_eggnog_db_dir = config.get("EGGNOG_DB_DIR", f"{TEMP}/eggnog_db")
+_eggnog_threads = config.get("EGGNOG_THREADS", 8)
+
+
+rule pangenome_eggnog:
+    """Convenience target: run both eggNOG-mapper and COGclassifier."""
+    input:
+        f"{DATA}/processed/eggnog/{SPECIES}.emapper.annotations",
+        f"{DATA}/processed/cogclassifier",
+
+
+rule eggnog_download_db:
+    """Download eggNOG v5.0.2 database via wget.
+
+    The official download_eggnog_data.py script hardcodes the old domain
+    (eggnogdb.embl.de) which returns 404. The DB has moved to eggnog5.embl.de.
+    See: https://github.com/eggnogdb/eggnog-mapper/issues/589
+    """
+    output:
+        directory(_eggnog_db_dir),
+    params:
+        base_url="http://eggnog5.embl.de/download/emapperdb-5.0.2",
+    retries: 3
+    shell:
+        "mkdir -p {output} && cd {output} && "
+        "aria2c -x 8 -c --auto-file-renaming=false {params.base_url}/eggnog.db.gz && "
+        "aria2c -x 8 -c --auto-file-renaming=false {params.base_url}/eggnog_proteins.dmnd.gz && "
+        "aria2c -x 8 -c --auto-file-renaming=false {params.base_url}/eggnog.taxa.tar.gz && "
+        "gunzip -f eggnog.db.gz && "
+        "gunzip -f eggnog_proteins.dmnd.gz && "
+        "tar xzf eggnog.taxa.tar.gz && rm eggnog.taxa.tar.gz"
+
+
+rule eggnog_annotate:
+    input:
+        seqs=f"{DATA}/processed/cd-hit-results/{SPECIES}_representative_sequences",
+        db=ancient(_eggnog_db_dir),
+    output:
+        f"{DATA}/processed/eggnog/{SPECIES}.emapper.annotations",
+    params:
+        outprefix=f"{DATA}/processed/eggnog/{SPECIES}",
+    conda:
+        "../envs/eggnog.yml"
+    threads:
+        _eggnog_threads
+    shell:
+        "mkdir -p $(dirname {params.outprefix}) && "
+        "emapper.py -i {input.seqs} --output {params.outprefix} "
+        "--data_dir {input.db} --cpu {threads} -m diamond "
+        "--tax_scope Bacteria --override"
+
+
+rule cogclassifier_run:
+    input:
+        f"{DATA}/processed/cd-hit-results/{SPECIES}_representative_sequences",
+    output:
+        directory(f"{DATA}/processed/cogclassifier"),
+    conda:
+        "../envs/cogclassifier.yml"
+    threads:
+        _eggnog_threads
+    retries: 3
+    shell:
+        "COGclassifier -i {input} -o {output} -t {threads}"

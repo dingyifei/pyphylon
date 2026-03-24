@@ -187,3 +187,83 @@ def gen_phylon_wordcloud(L, functions, phylon, cutoff=0,  save=False, filename='
     else:
         plt.show()
         plt.close()
+
+
+def load_eggnog_annotations(data_dir, species):
+    """Load eggNOG-mapper annotations and map allele IDs to cluster IDs.
+
+    Parameters
+    ----------
+    data_dir : str
+        Path to data directory (e.g. "data")
+    species : str
+        Species prefix (e.g. "CJejuni")
+
+    Returns
+    -------
+    pd.DataFrame
+        Indexed by cluster ID with columns: cog_category, kegg_ko,
+        kegg_pathway, kegg_module, eggnog_desc
+    """
+    import re
+
+    path = os.path.join(data_dir, "processed", "eggnog", f"{species}.emapper.annotations")
+    df = pd.read_csv(path, sep="\t", comment="#", header=None)
+
+    # eggNOG-mapper v2 output columns (0-indexed):
+    # 0=query, 4=evalue, 5=score, 6=eggNOG_OGs, 7=max_annot_lvl,
+    # 8=COG_category, 9=Description, 10=Preferred_name,
+    # 11=GOs, 12=EC, 13=KEGG_ko, 14=KEGG_Pathway, 15=KEGG_Module,
+    # 16=KEGG_Reaction, 17=KEGG_rclass, 18=BRITE, 19=KEGG_TC,
+    # 20=CAZy, 21=BiGG_Reaction, 22=PFAMs
+    col_map = {0: "query", 8: "cog_category", 9: "eggnog_desc",
+               13: "kegg_ko", 14: "kegg_pathway", 15: "kegg_module"}
+    df = df.rename(columns=col_map)[[*col_map.values()]]
+
+    # Strip allele suffix: CJejuni_C1093A0 -> CJejuni_C1093
+    df["cluster"] = df["query"].apply(lambda x: re.sub(r"A\d+$", "", x))
+    df = df.drop(columns=["query"]).set_index("cluster")
+
+    # Replace eggNOG-mapper's "-" placeholder with empty string
+    df = df.replace("-", "")
+
+    return df
+
+
+def load_cogclassifier_results(data_dir, species):
+    """Load COGclassifier results and map allele IDs to cluster IDs.
+
+    Parameters
+    ----------
+    data_dir : str
+        Path to data directory (e.g. "data")
+    species : str
+        Species prefix (e.g. "CJejuni")
+
+    Returns
+    -------
+    pd.DataFrame
+        Indexed by cluster ID with columns: cog_id, cog_category,
+        cog_description
+    """
+    import re
+
+    result_dir = os.path.join(data_dir, "processed", "cogclassifier")
+    # COGclassifier outputs classifier_result.tsv in the output directory
+    path = os.path.join(result_dir, "classifier_result.tsv")
+    df = pd.read_csv(path, sep="\t")
+
+    # Columns: QUERY_ID, COG_ID, CDD_ID, EVALUE, IDENTITY, GENE_NAME,
+    #          COG_NAME, COG_LETTER, COG_DESCRIPTION
+    df = df.rename(columns={
+        "QUERY_ID": "query",
+        "COG_ID": "cog_id",
+        "COG_LETTER": "cog_category",
+        "COG_DESCRIPTION": "cog_description",
+    })
+
+    # Strip allele suffix
+    df["cluster"] = df["query"].apply(lambda x: re.sub(r"A\d+$", "", x))
+    df = df[["cluster", "cog_id", "cog_category", "cog_description"]].set_index("cluster")
+
+    return df
