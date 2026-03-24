@@ -2,17 +2,17 @@
 -r requirements-core.txt
 
 # Marimo notebook framework
-marimo>=0.10.0
+marimo==0.20.4
 
 # Marimo optional features
-vegafusion[embed]          # server-side Vega charts
-vl-convert-python          # Vega-Lite chart export
-openai                     # AI assistant features
-mcp                        # MCP server connectivity
-python-lsp-server>=1.13.0   # Language Server Protocol
-python-lsp-ruff>=2.0.0      # Ruff linting plugin for pylsp
-pylsp-mypy                   # MyPy plugin for pylsp
-websockets                   # LSP transport
+vegafusion[embed]==2.0.3
+vl-convert-python==1.9.0.post1
+openai==2.26.0
+mcp==1.26.0
+python-lsp-server==1.14.0
+python-lsp-ruff==2.3.0
+pylsp-mypy==0.7.1
+websockets==16.0
 
 # Dev tools
-ruff>=0.9.0
+ruff==0.15.4
