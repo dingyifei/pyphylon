@@ -17,6 +17,8 @@ rule pangenome_mash:
     output:
         mash_sketch=f"{TEMP}/2b_mash/combined_sketch.msh",
         mash_distances=f"{TEMP}/2b_mash/mash_distances.txt",
+    conda:
+        "../envs/mash.yml"
     container:
         config["CONTAINER_MASH"]
     shell:

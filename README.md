@@ -115,7 +115,6 @@ docker compose run pipeline snakemake --cores 4 --sdm apptainer
 
 # Verify the environment
 docker compose run pipeline python -c "import marimo, pyphylon; print('OK')"
-docker compose run pipeline quarto --version
 ```
 
 Code changes (notebooks, pyphylon package, Snakefile) are bind-mounted and instantly visible inside the container. Only dependency changes require a rebuild.

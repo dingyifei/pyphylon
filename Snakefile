@@ -15,8 +15,13 @@ DATA = config["DATA_DIR"]
 SPECIES = config["PG_NAME"]
 FILTERED_GENOMES_FILE = config["FILTERED_GENOMES_FILE"]
 
+# Derive BAKTA_DB_DIR from BAKTA_DB_TYPE
+_bakta_type = config.get("BAKTA_DB_TYPE", "light")
+config["BAKTA_DB_DIR"] = f"{DATA}/db/bakta-{_bakta_type}"
+
 include: "workflow/mash/Snakefile"
 include: "workflow/anno_mlst_cdhit/Snakefile"
+include: "workflow/eggnog/Snakefile"
 include: "workflow/infer_affinities/Snakefile"
 
 # =============================================================================
@@ -226,7 +231,7 @@ rule nb_5b:
     output:
         f"{FIG}/5b_clustermap.png",
         f"{FIG}/5b_phylon_dendrogram.png",
-        f"{FIG}/5b_first_split_heatmap.png",
+        f"{FIG}/5b_split_1_heatmap.png",
         f"{OUT}/data/5b_gene_diff_stats.csv",
     shell:
         "python notebooks/5b_gene_diff.py -- --config {input.config}"
@@ -235,10 +240,16 @@ rule nb_5c:
     input:
         config="config.yml",
         L_binarized=f"{DATA}/processed/nmf-outputs/L_binarized.csv",
+        eggnog=f"{DATA}/processed/eggnog/{SPECIES}.emapper.annotations",
+        cogclassifier=f"{DATA}/processed/cogclassifier",
     output:
         f"{DATA}/processed/all_functions.csv",
         f"{OUT}/data/5c_phylon_go_enrichment.csv",
+        f"{OUT}/data/5c_phylon_cog_enrichment.csv",
+        f"{OUT}/data/5c_phylon_kegg_enrichment.csv",
         f"{FIG}/5c_enrichment_heatmap.png",
+        f"{FIG}/5c_cog_heatmap.png",
+        f"{FIG}/5c_kegg_heatmap.png",
     shell:
         "python notebooks/5c_functional_enrichments.py -- --config {input.config}"
 

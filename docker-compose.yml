@@ -3,12 +3,8 @@ services:
     build:
       context: .
       platforms: [linux/amd64]
-    privileged: true
     volumes:
       - .:/pipeline
-      - apptainer-cache:/root/.apptainer/cache
-    environment:
-      APPTAINER_CACHEDIR: /root/.apptainer/cache
     working_dir: /pipeline
 
   marimo:
@@ -20,6 +16,7 @@ services:
     working_dir: /pipeline
     ports:
       - "2718:2718"
+    init: true
     command: ["marimo", "edit", "--host", "0.0.0.0", "--port", "2718", "--no-token", "--watch", "notebooks/"]
 
   marimo-app:
@@ -31,7 +28,5 @@ services:
     working_dir: /pipeline
     ports:
       - "2719:2719"
+    init: true
     command: ["marimo", "run", "--host", "0.0.0.0", "--port", "2719", "--no-token", "--watch", "notebooks/"]
-
-volumes:
-  apptainer-cache:

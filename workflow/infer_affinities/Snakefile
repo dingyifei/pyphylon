@@ -15,17 +15,21 @@ def _get_infer_samples():
 rule infer_bakta:
     input:
         fna=f"{DATA}/inferring_affinities/input_strains/fna/{{sample}}.fna",
-        db=config["BAKTA_DB_DIR"],
+        db=config["BAKTA_DB_DIR"] + "/version.json",
     output:
         fna=f"{DATA}/inferring_affinities/bakta/{{sample}}/{{sample}}.fna",
         gff3=f"{DATA}/inferring_affinities/bakta/{{sample}}/{{sample}}.gff3",
         faa=f"{DATA}/inferring_affinities/bakta/{{sample}}/{{sample}}.faa",
+    params:
+        db_dir=config["BAKTA_DB_DIR"],
+    conda:
+        "../envs/bakta.yml"
     container:
         config["CONTAINER_BAKTA"]
     threads:
         config["BAKTA_THREADS"]
     shell:
-        "bakta --db {input.db} "
+        "bakta --db {params.db_dir} "
         "--output {DATA}/inferring_affinities/bakta/{wildcards.sample} "
         "--locus-tag {wildcards.sample} --prefix {wildcards.sample} "
         "--threads {threads} --force {input.fna}"
@@ -37,6 +41,8 @@ rule infer_mash:
         sketch=f"{TEMP}/2b_mash/combined_sketch.msh",
     output:
         f"{DATA}/inferring_affinities/mash/{{sample}}_distances.txt"
+    conda:
+        "../envs/mash.yml"
     container:
         config["CONTAINER_MASH"]
     shell:
@@ -70,6 +76,8 @@ rule infer_cdhit_2d:
         pangenome=f"{DATA}/processed/cd-hit-results/{SPECIES}_representative_sequences",
     output:
         f"{DATA}/inferring_affinities/bakta/{{sample}}/cd_hit/{{sample}}.clstr"
+    conda:
+        "../envs/cdhit.yml"
     container:
         config["CONTAINER_CDHIT"]
     threads:

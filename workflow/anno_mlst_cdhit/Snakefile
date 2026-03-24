@@ -15,32 +15,45 @@ def _get_anno_samples(wildcards=None):
 
 rule anno_get_db:
     output:
-        directory(config["BAKTA_DB_DIR"])
+        version=config["BAKTA_DB_DIR"] + "/version.json",
+    params:
+        db_dir=config["BAKTA_DB_DIR"],
+        tmp_dir=TEMP,
+        tarball="db-light.tar.xz" if config.get("BAKTA_DB_TYPE", "light") == "light" else "db.tar.xz",
+        extract_name="db-light" if config.get("BAKTA_DB_TYPE", "light") == "light" else "db",
+    conda:
+        "../envs/bakta.yml"
     container:
         config["CONTAINER_BAKTA"]
     shell:
-        "wget -O {TEMP}/db-light.tar.gz https://zenodo.org/record/10522951/files/db-light.tar.gz "
-        "&& tar -xzf {TEMP}/db-light.tar.gz -C {TEMP} "
-        "&& mv {TEMP}/db-light {output} "
-        "&& rm {TEMP}/db-light.tar.gz "
-        "&& amrfinder_update --force_update --database {output}/amrfinderplus-db"
+        "mkdir -p {params.db_dir} "
+        "&& wget -O {params.tmp_dir}/{params.tarball} https://zenodo.org/records/14916843/files/{params.tarball} "
+        "&& tar -xJf {params.tmp_dir}/{params.tarball} -C {params.tmp_dir} "
+        "&& rm -rf {params.db_dir}/* "
+        "&& mv {params.tmp_dir}/{params.extract_name}/* {params.db_dir}/ "
+        "&& rm -rf {params.tmp_dir}/{params.extract_name} {params.tmp_dir}/{params.tarball} "
+        "&& (amrfinder_update --force_update --database {params.db_dir}/amrfinderplus-db || true)"
 
 
 rule anno_bakta:
     input:
         fna=f"{DATA}/raw/genomes/fna/{{sample}}.fna",
-        db=config["BAKTA_DB_DIR"],
+        db=config["BAKTA_DB_DIR"] + "/version.json",
     output:
         fna=f"{DATA}/processed/bakta/{{sample}}/{{sample}}.fna",
         gbff=f"{DATA}/processed/bakta/{{sample}}/{{sample}}.gbff",
         faa=f"{DATA}/processed/bakta/{{sample}}/{{sample}}.faa",
         tsv=f"{DATA}/processed/bakta/{{sample}}/{{sample}}.tsv",
+    params:
+        db_dir=config["BAKTA_DB_DIR"],
+    conda:
+        "../envs/bakta.yml"
     container:
         config["CONTAINER_BAKTA"]
     threads:
         config["BAKTA_THREADS"]
     shell:
-        "bakta --db {input.db} "
+        "bakta --db {params.db_dir} "
         "--output {DATA}/processed/bakta/{wildcards.sample} "
         "--locus-tag {wildcards.sample} --prefix {wildcards.sample} "
         "--threads {threads} --force {input.fna}"
@@ -63,12 +76,14 @@ rule cdhit:
         f"{TEMP}/{SPECIES}.faa"
     output:
         f"{DATA}/processed/cd-hit-results/{SPECIES}"
+    conda:
+        "../envs/cdhit.yml"
     container:
         config["CONTAINER_CDHIT"]
     threads:
         config["CDHIT_THREADS"]
     shell:
-        "cdhit -i {input} -o {output} -d 0 -n 5 -c 0.8 -M 0 -aL 0.8 -T {threads}"
+        "cd-hit -i {input} -o {output} -d 0 -n 5 -c 0.8 -M 0 -aL 0.8 -T {threads}"
 
 
 rule mlst:
@@ -76,6 +91,8 @@ rule mlst:
         f"{DATA}/raw/genomes/fna/{{sample}}.fna"
     output:
         f"{DATA}/processed/mlst/{{sample}}.tsv"
+    conda:
+        "../envs/mlst.yml"
     container:
         config["CONTAINER_MLST"]
     threads:

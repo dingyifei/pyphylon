@@ -23,10 +23,12 @@ MASH_RANK: 16
 SMALL_CLUSTER_LIMIT: 5
 
 # --- Bioinformatics Workflow ---
-BAKTA_DB_DIR: "data/db/bakta-light"
-BAKTA_THREADS: 16
+BAKTA_DB_TYPE: "full"   # "light" or "full"
+BAKTA_THREADS: 4
 CDHIT_THREADS: 16
 MLST_THREADS: 16
+EGGNOG_THREADS: 8
+EGGNOG_DB_DIR: "temp/eggnog_db"   # ~50 GB, lives in temp/
 
 # --- Container Images (pinned SHAs) ---
 CONTAINER_BAKTA: "docker://oschwengers/bakta@sha256:86036e6a8eb836a3dd2d53e84cc3e63623e56b7f192fac12f8cb5da56859b039"
