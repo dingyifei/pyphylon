@@ -399,7 +399,7 @@ def _(OUT, strain_vectors_final, unique_genes_dict, variation_df):
         n_anchor = sum(1 for g in genes if isinstance(g, int))
         break  # All strains have the same anchor count
 
-    var_counts = variation_df["Variation"].value_counts()
+    _var_counts = variation_df["Variation"].value_counts()
     summary = pd.DataFrame(
         {
             "metric": [
@@ -413,10 +413,10 @@ def _(OUT, strain_vectors_final, unique_genes_dict, variation_df):
             "value": [
                 len(strain_vectors_final),
                 n_anchor,
-                int(var_counts.get("no variation", 0)),
-                int(var_counts.get("inversion", 0)),
-                int(var_counts.get("translocation", 0)),
-                int(var_counts.get("others", 0)),
+                int(_var_counts.get("no variation", 0)),
+                int(_var_counts.get("inversion", 0)),
+                int(_var_counts.get("translocation", 0)),
+                int(_var_counts.get("others", 0)),
             ],
         }
     )
@@ -436,7 +436,7 @@ def _(OUT, strain_vectors_final, unique_genes_dict, variation_df):
             f"- Strains with standardized gene order: {len(strain_vectors_final)}\n"
             f"- Anchor genes: {n_anchor}\n"
             f"- Variation: "
-            + ", ".join(f"{v}: {c}" for v, c in var_counts.items())
+            + ", ".join(f"{v}: {c}" for v, c in _var_counts.items())
             + f"\n- Unique gene-phylon pairs: {len(unique_genes_rows)}\n\n"
             f"**Outputs:**\n"
             f"- `5d_gene_length_distribution.png`\n"

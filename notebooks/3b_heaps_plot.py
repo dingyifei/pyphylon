@@ -119,6 +119,8 @@ def _(OUT, df_genes, df_pan_core):
     output_acc = fit_heaps_by_iteration(df_pan_core, section="acc")
     output_rare = fit_heaps_by_iteration(df_pan_core, section="rare")
 
+    # NOTE: If this errors with KeyError (e.g. 'Pan465'), the persistent cache
+    # "3b_pan_core" is stale — delete it and re-run so df_pan_core matches df_genes.
     n_genomes = df_genes.shape[1]
     last_col = str(n_genomes)
 

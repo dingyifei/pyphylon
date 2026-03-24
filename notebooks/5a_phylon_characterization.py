@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.20.2"
+__generated_with = "0.20.4"
 app = marimo.App(width="medium")
 
 with app.setup:
@@ -17,7 +17,12 @@ with app.setup:
     from sklearn.linear_model import LinearRegression
     from sklearn.metrics import r2_score
 
-    from pyphylon.biointerp import collect_functions, get_pg_to_locus_map
+    from pyphylon.biointerp import (
+        collect_functions,
+        get_pg_to_locus_map,
+        load_cogclassifier_results,
+        load_eggnog_annotations,
+    )
     from pyphylon.plotting_util import unique_genes_by_phylon
 
     plt.rcParams["pdf.fonttype"] = 42
@@ -533,8 +538,383 @@ def _(DATA, L_binarized, SPECIES, exclusive_genes_dict):
         )
     except Exception as _e:
         mo.output.replace(mo.callout(mo.md(f"Could not load annotations: {_e}"), kind="warn"))
-
     return cluster_products, phylon_gene_details
+
+
+@app.cell
+def _():
+    mo.md("""
+    ## Annotation Coverage Analysis
+
+    How well-annotated is the pangenome after BAKTA (db-full)?  Genes are
+    classified into four categories based on their product description:
+
+    | Category | Meaning |
+    |---|---|
+    | **Annotated** | Has a specific product name (e.g. "FlaA flagellin") |
+    | **Putative** | Product contains "putative" (partial confidence) |
+    | **Hypothetical** | Product is "hypothetical protein" (unknown function) |
+    | **Unannotated** | No product string at all (missing from BAKTA output) |
+    """)
+    return
+
+
+@app.cell
+def _(FIG, L_binarized, cluster_products, df_acc):
+    """Classify every pangenome gene and show overall annotation landscape."""
+
+    def _classify_product(product_str):
+        if not product_str or (isinstance(product_str, float) and np.isnan(product_str)):
+            return "unannotated"
+        product_str = str(product_str).strip()
+        if product_str == "":
+            return "unannotated"
+        products = [p.strip().lower() for p in product_str.split("; ")]
+        if all("hypothetical protein" in p for p in products):
+            return "hypothetical"
+        if any("putative" in p for p in products):
+            return "putative"
+        return "annotated"
+
+    # Classify all genes in cluster_products
+    _all_genes = set(L_binarized.index) | set(df_acc.index) | set(cluster_products.keys())
+    gene_anno_category = pd.Series(
+        {g: _classify_product(cluster_products.get(g, "")) for g in _all_genes},
+        name="category",
+    )
+
+    # Overall counts
+    _total = len(gene_anno_category)
+    _counts = gene_anno_category.value_counts()
+    _cat_order = ["annotated", "putative", "hypothetical", "unannotated"]
+    _counts = _counts.reindex(_cat_order, fill_value=0)
+    _pct_annotated = round((_counts.get("annotated", 0) + _counts.get("putative", 0)) / _total * 100, 1)
+
+    # Accessory-only counts
+    _acc_cats = gene_anno_category.reindex(df_acc.index).dropna()
+    _acc_counts = _acc_cats.value_counts().reindex(_cat_order, fill_value=0)
+
+    # --- Seaborn plots ---
+    _palette = {"annotated": "#2ecc71", "putative": "#f39c12", "hypothetical": "#e74c3c", "unannotated": "#95a5a6"}
+    _fig, (_ax1, _ax2) = plt.subplots(1, 2, figsize=(12, 5))
+
+    # Left: donut chart
+    _wedges, _texts, _autotexts = _ax1.pie(
+        _counts.values,
+        labels=_counts.index,
+        colors=[_palette[c] for c in _counts.index],
+        autopct="%1.1f%%",
+        startangle=90,
+        pctdistance=0.75,
+        wedgeprops=dict(width=0.4),
+    )
+    _ax1.set_title("Pangenome-Wide Annotation")
+
+    # Right: grouped bar chart (full pangenome vs accessory)
+    _bar_df = pd.DataFrame(
+        {"Full pangenome": _counts, "Accessory only": _acc_counts}
+    ).reset_index()
+    _bar_df.columns = ["category", "Full pangenome", "Accessory only"]
+    _bar_melted = _bar_df.melt(id_vars="category", var_name="subset", value_name="count")
+    sns.barplot(data=_bar_melted, x="category", y="count", hue="subset", ax=_ax2, palette="Set2", order=_cat_order)
+    _ax2.set_title("Full Pangenome vs Accessory")
+    _ax2.set_xlabel("")
+    _ax2.set_ylabel("Gene count")
+    _ax2.legend(title="")
+    for _bar in _ax2.patches:
+        _h = _bar.get_height()
+        if _h > 0:
+            _ax2.text(
+                _bar.get_x() + _bar.get_width() / 2,
+                _h + _total * 0.005,
+                f"{int(_h)}",
+                ha="center",
+                va="bottom",
+                fontsize=8,
+            )
+
+    plt.tight_layout()
+    _fig.savefig(os.path.join(FIG, "5a_annotation_coverage_overview.png"), bbox_inches="tight")
+
+    mo.output.replace(
+        mo.vstack(
+            [
+                mo.hstack(
+                    [
+                        mo.stat(value=f"{_total:,}", label="Total genes"),
+                        mo.stat(value=f"{_counts['annotated']:,}", label="Annotated"),
+                        mo.stat(value=f"{_counts['putative']:,}", label="Putative"),
+                        mo.stat(value=f"{_counts['hypothetical']:,}", label="Hypothetical"),
+                        mo.stat(value=f"{_counts['unannotated']:,}", label="Unannotated"),
+                        mo.stat(value=f"{_pct_annotated}%", label="Annotation rate"),
+                    ],
+                    justify="center",
+                    gap="1.5rem",
+                ),
+                _fig,
+            ]
+        )
+    )
+    return (gene_anno_category,)
+
+
+@app.cell
+def _(DATA, L_binarized, SPECIES):
+    """Show eggNOG-mapper and COGclassifier coverage if available."""
+    _stats = []
+    try:
+        _eggnog = load_eggnog_annotations(DATA, SPECIES)
+        _in_L = _eggnog.index.isin(L_binarized.index).sum()
+        _cog_pct = round((_eggnog["cog_category"] != "").sum() / len(_eggnog) * 100, 1)
+        _kegg_pct = round((_eggnog["kegg_ko"] != "").sum() / len(_eggnog) * 100, 1)
+        _stats.extend([
+            mo.stat(value=f"{_cog_pct}%", label="eggNOG COG"),
+            mo.stat(value=f"{_kegg_pct}%", label="eggNOG KEGG KO"),
+        ])
+    except FileNotFoundError:
+        pass
+
+    try:
+        _cog = load_cogclassifier_results(DATA, SPECIES)
+        _cog_in_L = _cog.index.isin(L_binarized.index).sum()
+        _cog_rate = round(len(_cog) / len(L_binarized) * 100, 1)
+        _stats.append(mo.stat(value=f"{_cog_rate}%", label="COGclassifier"))
+    except FileNotFoundError:
+        pass
+
+    if _stats:
+        mo.output.replace(
+            mo.vstack([
+                mo.md("### Orthology-Based Annotation Coverage"),
+                mo.hstack(_stats, justify="center", gap="1.5rem"),
+            ])
+        )
+    else:
+        mo.output.replace(
+            mo.callout(
+                mo.md("eggNOG/COGclassifier not yet run. Use `snakemake pangenome_eggnog --sdm conda` to generate."),
+                kind="info",
+            )
+        )
+    return
+
+
+@app.cell
+def _(FIG, L_binarized, gene_anno_category):
+    """Per-phylon annotation coverage: heatmap + stacked bar."""
+    _cat_order = ["annotated", "putative", "hypothetical", "unannotated"]
+    _palette = {"annotated": "#2ecc71", "putative": "#f39c12", "hypothetical": "#e74c3c", "unannotated": "#95a5a6"}
+
+    _rows = []
+    for _p in L_binarized.columns:
+        _genes = L_binarized.index[L_binarized[_p] == 1]
+        _cats = gene_anno_category.reindex(_genes).fillna("unannotated")
+        _vc = _cats.value_counts().reindex(_cat_order, fill_value=0)
+        _n = len(_genes)
+        _row = {"phylon": _p, "n_genes": _n}
+        for _c in _cat_order:
+            _row[f"n_{_c}"] = _vc[_c]
+            _row[f"pct_{_c}"] = round(_vc[_c] / _n * 100, 1) if _n > 0 else 0
+        _rows.append(_row)
+
+    phylon_anno_summary = pd.DataFrame(_rows)
+
+    # --- Heatmap: phylons x categories (% values, annotated with counts) ---
+    _pct_matrix = phylon_anno_summary.set_index("phylon")[[f"pct_{c}" for c in _cat_order]]
+    _pct_matrix.columns = _cat_order
+    _count_matrix = phylon_anno_summary.set_index("phylon")[[f"n_{c}" for c in _cat_order]]
+    _count_matrix.columns = _cat_order
+
+    _fig, (_ax1, _ax2) = plt.subplots(1, 2, figsize=(14, 6), gridspec_kw={"width_ratios": [1, 1.3]})
+
+    # Heatmap
+    sns.heatmap(
+        _pct_matrix,
+        annot=_count_matrix.values,
+        fmt=".0f",
+        cmap="YlOrRd",
+        ax=_ax1,
+        cbar_kws={"label": "% of phylon genes"},
+        linewidths=0.5,
+    )
+    _ax1.set_title("Annotation Coverage by Phylon (%)")
+    _ax1.set_ylabel("")
+
+    # Stacked horizontal bar
+    _left = np.zeros(len(phylon_anno_summary))
+    for _c in _cat_order:
+        _vals = phylon_anno_summary[f"pct_{_c}"].values
+        _ax2.barh(
+            phylon_anno_summary["phylon"],
+            _vals,
+            left=_left,
+            color=_palette[_c],
+            label=_c,
+            edgecolor="white",
+            linewidth=0.5,
+        )
+        _left += _vals
+    _ax2.set_xlabel("% of genes")
+    _ax2.set_title("Annotation Composition by Phylon")
+    _ax2.legend(loc="lower left", framealpha=0.9)
+    _ax2.invert_yaxis()
+
+    plt.tight_layout()
+    _fig.savefig(os.path.join(FIG, "5a_annotation_by_phylon.png"), bbox_inches="tight")
+
+    mo.output.replace(
+        mo.vstack(
+            [
+                _fig,
+                mo.md("### Per-Phylon Summary"),
+                mo.ui.table(phylon_anno_summary),
+            ]
+        )
+    )
+    return (phylon_anno_summary,)
+
+
+@app.cell
+def _(A_binarized, DATA, FIG, SPECIES, gene_anno_category):
+    """Per-strain annotation coverage: histogram + heatmap ordered by phylon."""
+    import gzip
+    import pickle
+
+    _cat_order = ["annotated", "putative", "hypothetical", "unannotated"]
+
+    # Load full P matrix for all-gene per-strain counts
+    _p_path = os.path.join(DATA, "processed", "cd-hit-results", f"{SPECIES}_strain_by_gene.pickle.gz")
+    with gzip.open(_p_path, "rb") as _fh:
+        _p_matrix = pickle.load(_fh)
+    _p_matrix = _p_matrix.fillna(0).astype(bool)
+
+    # Per-strain category counts
+    _strain_rows = []
+    for _strain in _p_matrix.columns:
+        _present = _p_matrix.index[_p_matrix[_strain]]
+        _cats = gene_anno_category.reindex(_present).fillna("unannotated")
+        _vc = _cats.value_counts().reindex(_cat_order, fill_value=0)
+        _n = len(_present)
+        _row = {"strain": _strain, "n_genes": _n}
+        for _c in _cat_order:
+            _row[f"n_{_c}"] = int(_vc[_c])
+            _row[f"pct_{_c}"] = round(_vc[_c] / _n * 100, 1) if _n > 0 else 0
+        _strain_rows.append(_row)
+
+    strain_anno_summary = pd.DataFrame(_strain_rows)
+
+    # Assign primary phylon per strain (highest A_norm affinity, from binarized)
+    _primary_phylon = []
+    for _s in strain_anno_summary["strain"]:
+        if _s in A_binarized.columns:
+            _memberships = A_binarized[_s]
+            _active = _memberships[_memberships == 1].index.tolist()
+            _primary_phylon.append(_active[0] if len(_active) == 1 else (_active[0] if _active else "none"))
+        else:
+            _primary_phylon.append("none")
+    strain_anno_summary["primary_phylon"] = _primary_phylon
+
+    # --- Plots ---
+    _fig, (_ax1, _ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+    # Left: histogram of annotation rate
+    sns.histplot(
+        data=strain_anno_summary,
+        x="pct_annotated",
+        bins=30,
+        kde=True,
+        color="#2ecc71",
+        ax=_ax1,
+        edgecolor="white",
+    )
+    _ax1.axvline(strain_anno_summary["pct_annotated"].median(), color="#e74c3c", ls="--", label="median")
+    _ax1.set_xlabel("% genes annotated per strain")
+    _ax1.set_ylabel("Number of strains")
+    _ax1.set_title("Distribution of Annotation Rate")
+    _ax1.legend()
+
+    # Right: box plot by primary phylon
+    _plot_df = strain_anno_summary[strain_anno_summary["primary_phylon"] != "none"].copy()
+    _phylon_order = _plot_df.groupby("primary_phylon")["pct_annotated"].median().sort_values().index.tolist()
+    sns.boxplot(
+        data=_plot_df,
+        y="primary_phylon",
+        x="pct_annotated",
+        order=_phylon_order,
+        palette="viridis",
+        ax=_ax2,
+    )
+    _ax2.set_xlabel("% genes annotated")
+    _ax2.set_ylabel("")
+    _ax2.set_title("Annotation Rate by Phylon")
+
+    plt.tight_layout()
+    _fig.savefig(os.path.join(FIG, "5a_annotation_by_strain.png"), bbox_inches="tight")
+
+    _med = strain_anno_summary["pct_annotated"].median()
+    _mn = strain_anno_summary["pct_annotated"].min()
+    _mx = strain_anno_summary["pct_annotated"].max()
+
+    mo.output.replace(
+        mo.vstack(
+            [
+                mo.hstack(
+                    [
+                        mo.stat(value=f"{_med:.1f}%", label="Median annotation rate"),
+                        mo.stat(value=f"{_mn:.1f}%", label="Min"),
+                        mo.stat(value=f"{_mx:.1f}%", label="Max"),
+                        mo.stat(value=str(len(strain_anno_summary)), label="Strains"),
+                    ],
+                    justify="center",
+                    gap="1.5rem",
+                ),
+                _fig,
+            ]
+        )
+    )
+    return (strain_anno_summary,)
+
+
+@app.cell
+def _(L_binarized, df_acc, gene_anno_category):
+    """Top hypothetical/unannotated genes — high-frequency annotation gaps."""
+    _cat_order_gap = ["hypothetical", "unannotated"]
+    _gap_genes = gene_anno_category[gene_anno_category.isin(_cat_order_gap)]
+
+    # Gene frequency (number of strains carrying each gene)
+    _freq = df_acc.sum(axis=1)
+
+    _rows = []
+    for _g in _gap_genes.index:
+        _n_strains = int(_freq.get(_g, 0))
+        _n_phylons = int(L_binarized.loc[_g].sum()) if _g in L_binarized.index else 0
+        _phylons = ", ".join(L_binarized.columns[L_binarized.loc[_g] == 1].tolist()) if _g in L_binarized.index else ""
+        _rows.append(
+            {
+                "gene": _g,
+                "category": gene_anno_category[_g],
+                "n_strains": _n_strains,
+                "n_phylons": _n_phylons,
+                "phylons": _phylons,
+            }
+        )
+
+    _gap_df = pd.DataFrame(_rows).sort_values("n_strains", ascending=False).head(50).reset_index(drop=True)
+
+    mo.output.replace(
+        mo.vstack(
+            [
+                mo.md(
+                    "### Top 50 Unannotated / Hypothetical Genes by Prevalence\n\n"
+                    "These are the most common genes across strains that still lack "
+                    "functional annotation — high-priority targets for manual curation "
+                    "or experimental characterization."
+                ),
+                mo.ui.table(_gap_df),
+            ]
+        )
+    )
+    return
 
 
 @app.cell
@@ -589,7 +969,7 @@ def _(phylon_profiles):
         value=phylon_profiles.iloc[0]["phylon"],
         label="Select phylon",
     )
-    phylon_dropdown
+    mo.output.replace(phylon_dropdown)
     return (phylon_dropdown,)
 
 
@@ -675,7 +1055,14 @@ def _():
 
 
 @app.cell
-def _(OUT, phylon_gene_details, phylon_profiles, phylon_strain_demographics):
+def _(
+    OUT,
+    phylon_anno_summary,
+    phylon_gene_details,
+    phylon_profiles,
+    phylon_strain_demographics,
+    strain_anno_summary,
+):
     """Save per-phylon characterization CSVs."""
     _saved = []
 
@@ -689,6 +1076,12 @@ def _(OUT, phylon_gene_details, phylon_profiles, phylon_strain_demographics):
     if len(phylon_strain_demographics) > 0:
         phylon_strain_demographics.to_csv(os.path.join(OUT, "data", "5a_phylon_strain_demographics.csv"), index=False)
         _saved.append(f"- `5a_phylon_strain_demographics.csv`: {len(phylon_strain_demographics)} entries")
+
+    phylon_anno_summary.to_csv(os.path.join(OUT, "data", "5a_phylon_anno_summary.csv"), index=False)
+    _saved.append(f"- `5a_phylon_anno_summary.csv`: {len(phylon_anno_summary)} phylons")
+
+    strain_anno_summary.to_csv(os.path.join(OUT, "data", "5a_strain_anno_summary.csv"), index=False)
+    _saved.append(f"- `5a_strain_anno_summary.csv`: {len(strain_anno_summary)} strains")
 
     mo.output.replace(mo.md("Saved characterization outputs:\n\n" + "\n".join(_saved)))
     return

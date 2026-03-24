@@ -34,7 +34,7 @@ def _():
 
 @app.cell
 def _():
-    mo.md("""
+    mo.md(r"""
     ## Setup
     """)
     return
@@ -82,7 +82,7 @@ def _(TEMP):
 
 @app.cell
 def _():
-    mo.md("""
+    mo.md(r"""
     ## Download
 
     Download `.fna` genome files from BV-BRC. Already-downloaded files are
